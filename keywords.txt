@@ -51,8 +51,4 @@ var
 while
 with
 xor
-dispose
-exit
-false
-new
-true
+writeln
