@@ -11,6 +11,38 @@ public class TokenScanner {
     private static final int OPERATOR = 3;
     private static final int QUOTE = 4;
 
+    private static final HashMap<String, String> KEYWORDS_TOKEN;
+    static {
+        KEYWORDS_TOKEN = new HashMap<>();
+        String word;
+
+        try {
+            Scanner sc = new Scanner(new File("keywords.txt"));
+            while(sc.hasNext()){
+                word = sc.next();
+                KEYWORDS_TOKEN.put(word, String.format("TK_%s", word.toUpperCase()));
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static final HashMap<Character, String> OPERATORS_TOKEN;
+    static {
+        OPERATORS_TOKEN = new HashMap<>();
+        OPERATORS_TOKEN.put('(', "TK_OPEN_PARENTHESIS");
+        OPERATORS_TOKEN.put(')', "TK_CLOSE_PARENTHESIS");
+        OPERATORS_TOKEN.put('.', "TK_DOT");
+        OPERATORS_TOKEN.put(';', "TK_SEMI_COLON");
+        OPERATORS_TOKEN.put('+', "TK_PLUS");
+        OPERATORS_TOKEN.put('-', "TK_MINUS");
+        OPERATORS_TOKEN.put('*', "TK_MULTIPLY");
+        OPERATORS_TOKEN.put('/', "TK_DIVIDE");
+        OPERATORS_TOKEN.put('<', "TK_LESS_THAN");
+        OPERATORS_TOKEN.put('>', "TK_GREATER_THAN");
+        OPERATORS_TOKEN.put('=', "TK_EQUAL");
+    }
+
     private static final HashMap<Character, Integer> CHAR_TYPE;
     static {
         CHAR_TYPE = new HashMap<>();
@@ -32,47 +64,11 @@ public class TokenScanner {
             CHAR_TYPE.put(currentChar, SPACE);
         }
 
-        //TODO: Operators not finished
-        for (int i = 33; i < 44; i++){
-            // Add operators
-            char currentChar = Character.toChars(i)[0];
-            CHAR_TYPE.put(currentChar, OPERATOR);
-        }
-        for (int i = 58; i < 64; i++){
-            // Add operators
-            char currentChar = Character.toChars(i)[0];
-            CHAR_TYPE.put(currentChar, OPERATOR);
+        for (Character key: OPERATORS_TOKEN.keySet()) {
+            CHAR_TYPE.put(key, OPERATOR);
         }
 
         CHAR_TYPE.put(Character.toChars(39)[0], QUOTE);
-        CHAR_TYPE.put('.', OPERATOR);
-        CHAR_TYPE.put(';', OPERATOR);
-    }
-
-    private static final HashMap<String, String> KEYWORDS;
-    static {
-        KEYWORDS = new HashMap<>();
-        String word;
-
-        try {
-            Scanner sc = new Scanner(new File("keywords.txt"));
-            while(sc.hasNext()){
-                word = sc.next();
-                KEYWORDS.put(word, String.format("TK_%s", word.toUpperCase()));
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static final HashMap<Character, String> OPERATORS_TOKEN;
-    static {
-        OPERATORS_TOKEN = new HashMap<>();
-        OPERATORS_TOKEN.put('(', "TK_OPEN_PARENTHESIS");
-        OPERATORS_TOKEN.put(')', "TK_CLOSE_PARENTHESIS");
-        OPERATORS_TOKEN.put('.', "TK_DOT");
-        OPERATORS_TOKEN.put(';', "TK_SEMI_COLON");
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -117,8 +113,8 @@ public class TokenScanner {
                         tokenName = endOfWord(tokenName);
                     }
 
-                    if(KEYWORDS.containsKey(tokenName)){
-                        System.out.println(KEYWORDS.get(tokenName));
+                    if(KEYWORDS_TOKEN.containsKey(tokenName)){
+                        System.out.println(KEYWORDS_TOKEN.get(tokenName));
                         tokenName = "";
                     }
 
@@ -134,7 +130,7 @@ public class TokenScanner {
                     tokenName += element;
 
                     if (!readString) {
-                        System.out.println("TK_STRING: " + tokenName );
+                        System.out.println("TK_STRLIT: " + tokenName );
                         tokenName = "";
                     }
 
@@ -151,8 +147,8 @@ public class TokenScanner {
     }
 
     public static String endOfWord(String tokenName){
-        if(KEYWORDS.containsKey(tokenName)){
-            System.out.println(KEYWORDS.get(tokenName));
+        if(KEYWORDS_TOKEN.containsKey(tokenName)){
+            System.out.println(KEYWORDS_TOKEN.get(tokenName));
             tokenName = "";
         } else {
             if (tokenName.length() > 0) {
