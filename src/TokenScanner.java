@@ -104,7 +104,7 @@ public class TokenScanner {
                 case SPACE:
                     if (readingString){
                         tokenName += element;
-                    } else {
+                    } else if (!readingNumber && !readingString) {
                         tokenName = endOfWord(tokenName);
 
                         if (element == Character.toChars(10)[0]){
