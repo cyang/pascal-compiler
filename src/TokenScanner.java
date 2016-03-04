@@ -41,6 +41,7 @@ public class TokenScanner {
         OPERATORS_TOKEN.put('<', "TK_LESS_THAN");
         OPERATORS_TOKEN.put('>', "TK_GREATER_THAN");
         OPERATORS_TOKEN.put('=', "TK_EQUAL");
+        OPERATORS_TOKEN.put(',', "TK_COMMA");
     }
 
     private static final HashMap<Character, Integer> CHAR_TYPE;
@@ -75,7 +76,9 @@ public class TokenScanner {
         String tokenName = "";
         int lineRow = 0;
         int lineCol = 0;
-        boolean readString = false;
+        boolean readingString = false;
+        boolean readingNumber = false;
+        boolean isFloat = false;
 
         // Delimiter to scan each char
         Scanner sc = new Scanner(new File(args[0])).useDelimiter("");
@@ -90,11 +93,16 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 case DIGIT:
+                    if (tokenName.isEmpty()) {
+                        readingNumber = true;
+                    }
+
+                    tokenName += element;
 
                     lineCol++;
                     break;
                 case SPACE:
-                    if (readString){
+                    if (readingString){
                         tokenName += element;
                     } else {
                         tokenName = endOfWord(tokenName);
@@ -109,27 +117,53 @@ public class TokenScanner {
                     }
                     break;
                 case OPERATOR:
-                    if (element == ';'){
-                        tokenName = endOfWord(tokenName);
-                    }
+                    if (readingString) {
+                        tokenName += element;
+                    } else {
 
-                    if(KEYWORDS_TOKEN.containsKey(tokenName)){
-                        System.out.println(KEYWORDS_TOKEN.get(tokenName));
-                        tokenName = "";
-                    }
+                        if (element == ';') {
+                            tokenName = endOfWord(tokenName);
+                        }
 
-                    if(OPERATORS_TOKEN.containsKey(element)){
-                        System.out.println(OPERATORS_TOKEN.get(element));
-                        tokenName = "";
-                    }
+                        if (element == '.' && readingNumber) {
+                            isFloat = true;
+                        }
 
+
+
+                        if (KEYWORDS_TOKEN.containsKey(tokenName)) {
+                            System.out.println(KEYWORDS_TOKEN.get(tokenName));
+                            tokenName = "";
+                        }
+
+                        if (OPERATORS_TOKEN.containsKey(element)) {
+
+                            if (readingNumber) {
+                                if (element == '.'){
+                                    tokenName += element;
+                                } else {
+                                    readingNumber = false;
+                                    if (isFloat) {
+                                        System.out.println("TK_FLOATLIT: " + tokenName);
+                                        isFloat = false;
+                                    } else {
+                                        System.out.println("TK_INTLIT: " + tokenName);
+                                    }
+
+                                    System.out.println(OPERATORS_TOKEN.get(element));
+                                    tokenName = "";
+                                }
+                            }
+
+                        }
+                    }
                     lineCol++;
                     break;
                 case QUOTE:
-                    readString = !readString;
+                    readingString = !readingString;
                     tokenName += element;
 
-                    if (!readString) {
+                    if (!readingString) {
                         System.out.println("TK_STRLIT: " + tokenName );
                         tokenName = "";
                     }
@@ -137,9 +171,9 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 default:
+
                     lineCol++;
                     break;
-
             }
         }
 
