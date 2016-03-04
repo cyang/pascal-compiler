@@ -46,6 +46,7 @@ public class TokenScanner {
 
         CHAR_TYPE.put(Character.toChars(39)[0], QUOTE);
         CHAR_TYPE.put('.', OPERATOR);
+        CHAR_TYPE.put(';', OPERATOR);
     }
 
     private static final HashMap<String, String> KEYWORDS;
@@ -71,6 +72,7 @@ public class TokenScanner {
         OPERATORS_TOKEN.put('(', "TK_OPEN_PARENTHESIS");
         OPERATORS_TOKEN.put(')', "TK_CLOSE_PARENTHESIS");
         OPERATORS_TOKEN.put('.', "TK_DOT");
+        OPERATORS_TOKEN.put(';', "TK_SEMI_COLON");
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -99,15 +101,7 @@ public class TokenScanner {
                     if (readString){
                         tokenName += element;
                     } else {
-                        if(KEYWORDS.containsKey(tokenName)){
-                            System.out.println(KEYWORDS.get(tokenName));
-                            tokenName = "";
-                        } else {
-                            if (tokenName.length() > 0) {
-                                System.out.println("TK_IDENTIFIER: " + tokenName);
-                                tokenName = "";
-                            }
-                        }
+                        tokenName = endOfWord(tokenName);
 
                         if (element == Character.toChars(10)[0]){
                             // Check for newline on unix
@@ -119,6 +113,10 @@ public class TokenScanner {
                     }
                     break;
                 case OPERATOR:
+                    if (element == ';'){
+                        tokenName = endOfWord(tokenName);
+                    }
+
                     if(KEYWORDS.containsKey(tokenName)){
                         System.out.println(KEYWORDS.get(tokenName));
                         tokenName = "";
@@ -150,6 +148,20 @@ public class TokenScanner {
         }
 
         System.out.println("TK_EOF");
+    }
+
+    public static String endOfWord(String tokenName){
+        if(KEYWORDS.containsKey(tokenName)){
+            System.out.println(KEYWORDS.get(tokenName));
+            tokenName = "";
+        } else {
+            if (tokenName.length() > 0) {
+                System.out.println("TK_IDENTIFIER: " + tokenName);
+                tokenName = "";
+            }
+        }
+
+        return tokenName;
     }
 
 }
