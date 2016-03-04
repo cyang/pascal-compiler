@@ -83,7 +83,7 @@ public class TokenScanner {
         Scanner sc = new Scanner(new File(args[0])).useDelimiter("");
 
         while (sc.hasNext()) {
-            char element = sc.next().toLowerCase().charAt(0);
+            char element = sc.next().charAt(0);
 
             switch (CHAR_TYPE.get(element)){
                 case LETTER:
@@ -96,17 +96,26 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 case SPACE:
-                    if(KEYWORDS.containsKey(tokenName)){
-                        System.out.println(KEYWORDS.get(tokenName));
-                        tokenName = "";
-                    }
-
-                    if (element == Character.toChars(10)[0]){
-                        // Check for newline on unix
-                        lineRow++;
-                        lineCol = 0;
+                    if (readString){
+                        tokenName += element;
                     } else {
-                        lineCol++;
+                        if(KEYWORDS.containsKey(tokenName)){
+                            System.out.println(KEYWORDS.get(tokenName));
+                            tokenName = "";
+                        } else {
+                            if (tokenName.length() > 0) {
+                                System.out.println("TK_IDENTIFIER: " + tokenName);
+                                tokenName = "";
+                            }
+                        }
+
+                        if (element == Character.toChars(10)[0]){
+                            // Check for newline on unix
+                            lineRow++;
+                            lineCol = 0;
+                        } else {
+                            lineCol++;
+                        }
                     }
                     break;
                 case OPERATOR:
@@ -117,6 +126,7 @@ public class TokenScanner {
 
                     if(OPERATORS_TOKEN.containsKey(element)){
                         System.out.println(OPERATORS_TOKEN.get(element));
+                        tokenName = "";
                     }
 
                     lineCol++;
@@ -128,9 +138,7 @@ public class TokenScanner {
                     if (!readString) {
                         System.out.println("TK_STRING: " + tokenName );
                         tokenName = "";
-                    } else
-
-
+                    }
 
                     lineCol++;
                     break;
@@ -140,6 +148,8 @@ public class TokenScanner {
 
             }
         }
+
+        System.out.println("TK_EOF");
     }
 
 }
