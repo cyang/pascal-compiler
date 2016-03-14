@@ -5,6 +5,14 @@ import java.util.Scanner;
 
 public class TokenScanner {
 
+    private static String tokenName = "";
+    private static int lineRow = 0;
+    private static int lineCol = 0;
+    private static boolean readingString = false;
+    private static boolean readingNumber = false;
+    private static boolean isFloat = false;
+    private static boolean sciNotation = false;
+
     private static final int LETTER = 0;
     private static final int DIGIT = 1;
     private static final int SPACE = 2;
@@ -69,16 +77,11 @@ public class TokenScanner {
             CHAR_TYPE.put(key, OPERATOR);
         }
 
+        // Add signle quote
         CHAR_TYPE.put(Character.toChars(39)[0], QUOTE);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        String tokenName = "";
-        int lineRow = 0;
-        int lineCol = 0;
-        boolean readingString = false;
-        boolean readingNumber = false;
-        boolean isFloat = false;
 
         // Delimiter to scan each char
         Scanner sc = new Scanner(new File(args[0])).useDelimiter("");
@@ -89,6 +92,11 @@ public class TokenScanner {
             switch (CHAR_TYPE.get(element)){
                 case LETTER:
                     tokenName += element;
+
+                    if (element == 'E' && readingNumber) {
+                        // TODO Check for scientific notation
+                        sciNotation = true;
+                    }
 
                     lineCol++;
                     break;
@@ -103,67 +111,65 @@ public class TokenScanner {
                     break;
                 case SPACE:
                     if (readingString){
+                        // Append to a string
                         tokenName += element;
                     } else if (!readingNumber && !readingString) {
+                        // End of word
                         tokenName = endOfWord(tokenName);
 
                         if (element == Character.toChars(10)[0]){
-                            // Check for newline on unix
+                            // Check for newline on Unix OS
                             lineRow++;
                             lineCol = 0;
                         } else {
+                            // Continue reading line
                             lineCol++;
                         }
                     }
                     break;
                 case OPERATOR:
                     if (readingString) {
+                        // Append to a string
                         tokenName += element;
-                    } else {
-
-                        if (element == ';') {
-                            tokenName = endOfWord(tokenName);
-                        }
-
-                        if (element == '.' && readingNumber) {
+                    } else if (readingNumber) {
+                        if (element == '.') {
+                            // Found decimal in float
                             isFloat = true;
-                        }
+                            tokenName += element;
+                        } else {
+                            readingNumber = false;
+                            if (isFloat) {
+                                System.out.println("TK_FLOATLIT: " + tokenName);
+                                isFloat = false;
+                            } else {
+                                System.out.println("TK_INTLIT: " + tokenName);
+                            }
 
-
-
-                        if (KEYWORDS_TOKEN.containsKey(tokenName)) {
-                            System.out.println(KEYWORDS_TOKEN.get(tokenName));
+                            System.out.println(OPERATORS_TOKEN.get(element));
                             tokenName = "";
                         }
 
+                    } else {
+
+                        if (element == ';') {
+                            // Before end of line
+                            tokenName = endOfWord(tokenName);
+                        }
+
                         if (OPERATORS_TOKEN.containsKey(element)) {
-
-                            if (readingNumber) {
-                                if (element == '.'){
-                                    tokenName += element;
-                                } else {
-                                    readingNumber = false;
-                                    if (isFloat) {
-                                        System.out.println("TK_FLOATLIT: " + tokenName);
-                                        isFloat = false;
-                                    } else {
-                                        System.out.println("TK_INTLIT: " + tokenName);
-                                    }
-
-                                    System.out.println(OPERATORS_TOKEN.get(element));
-                                    tokenName = "";
-                                }
-                            }
+                            System.out.println(OPERATORS_TOKEN.get(element));
 
                         }
                     }
                     lineCol++;
                     break;
                 case QUOTE:
+                    // Found begin/end quote
                     readingString = !readingString;
                     tokenName += element;
 
                     if (!readingString) {
+                        // Found end quote
                         System.out.println("TK_STRLIT: " + tokenName );
                         tokenName = "";
                     }
@@ -171,7 +177,7 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 default:
-
+                    System.out.println("Default case");
                     lineCol++;
                     break;
             }
@@ -191,7 +197,15 @@ public class TokenScanner {
             }
         }
 
+        clearStatuses();
+
         return tokenName;
     }
 
+    public static void clearStatuses() {
+        readingString = false;
+        readingNumber = false;
+        isFloat = false;
+        sciNotation = false;
+    }
 }
