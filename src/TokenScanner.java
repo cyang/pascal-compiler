@@ -115,7 +115,7 @@ public class TokenScanner {
                         tokenName += element;
                     } else if (!readingNumber && !readingString) {
                         // End of word
-                        tokenName = endOfWord(tokenName);
+                        tokenName = endOfWord();
 
                         if (element == Character.toChars(10)[0]){
                             // Check for newline on Unix OS
@@ -132,7 +132,10 @@ public class TokenScanner {
                         // Append to a string
                         tokenName += element;
                     } else if (readingNumber) {
-                        if (element == '.') {
+
+                        if (sciNotation && (element == '+' || element == '-')) {
+                            tokenName += element;
+                        } else if (element == '.') {
                             // Found decimal in float
                             isFloat = true;
                             tokenName += element;
@@ -148,17 +151,16 @@ public class TokenScanner {
                             System.out.println(OPERATORS_TOKEN.get(element));
                             tokenName = "";
                         }
-
                     } else {
 
                         if (element == ';') {
                             // Before end of line
-                            tokenName = endOfWord(tokenName);
+                            tokenName = endOfWord();
                         }
 
                         if (OPERATORS_TOKEN.containsKey(element)) {
+                            tokenName = endOfWord();
                             System.out.println(OPERATORS_TOKEN.get(element));
-
                         }
                     }
                     lineCol++;
@@ -186,7 +188,7 @@ public class TokenScanner {
         System.out.println("TK_EOF");
     }
 
-    public static String endOfWord(String tokenName){
+    public static String endOfWord(){
         if(KEYWORDS_TOKEN.containsKey(tokenName)){
             System.out.println(KEYWORDS_TOKEN.get(tokenName));
             tokenName = "";
