@@ -91,10 +91,11 @@ public class TokenScanner {
 
             switch (CHAR_TYPE.get(element)){
                 case LETTER:
-                    tokenName += element;
+                    if (!readingNumber) {
+                        tokenName += element;
+                    }
 
                     if (element == 'E' && readingNumber) {
-                        // TODO Check for scientific notation
                         sciNotation = true;
                     }
 
@@ -179,9 +180,9 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 default:
-                    System.out.println("Default case");
-                    lineCol++;
-                    break;
+                    //TODO throw an error for unhandled element
+                    throw new Error("Unhandled element scanned");
+
             }
         }
 

@@ -5,12 +5,19 @@ public class Token {
     private int lineCol;
     private int lineRow;
 
+    private Token next = null;
+
     public Token(String tokenType, String tokenValue, int lineCol, int lineRow){
         this.tokenType = tokenType;
         this.tokenValue = tokenValue;
 
         this.lineCol = lineCol;
         this.lineRow = lineRow;
+    }
+
+    @Override
+    public String toString(){
+        return tokenValue;
     }
 
     public String getTokenType() {
@@ -43,5 +50,13 @@ public class Token {
 
     public void setLineRow(int lineRow) {
         this.lineRow = lineRow;
+    }
+
+    public Token getNext() {
+        return next;
+    }
+
+    public void setNext(Token next) {
+        this.next = next;
     }
 }
