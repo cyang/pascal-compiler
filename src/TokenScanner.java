@@ -12,6 +12,7 @@ public class TokenScanner {
     private static boolean readingNumber = false;
     private static boolean isFloat = false;
     private static boolean sciNotation = false;
+    private static boolean readingColon = false;
 
     private static final int LETTER = 0;
     private static final int DIGIT = 1;
@@ -35,50 +36,52 @@ public class TokenScanner {
         }
     }
 
-    private static final HashMap<Character, String> OPERATORS_TOKEN;
+    private static final HashMap<String, String> OPERATORS_TOKEN;
     static {
         OPERATORS_TOKEN = new HashMap<>();
-        OPERATORS_TOKEN.put('(', "TK_OPEN_PARENTHESIS");
-        OPERATORS_TOKEN.put(')', "TK_CLOSE_PARENTHESIS");
-        OPERATORS_TOKEN.put('.', "TK_DOT");
-        OPERATORS_TOKEN.put(';', "TK_SEMI_COLON");
-        OPERATORS_TOKEN.put('+', "TK_PLUS");
-        OPERATORS_TOKEN.put('-', "TK_MINUS");
-        OPERATORS_TOKEN.put('*', "TK_MULTIPLY");
-        OPERATORS_TOKEN.put('/', "TK_DIVIDE");
-        OPERATORS_TOKEN.put('<', "TK_LESS_THAN");
-        OPERATORS_TOKEN.put('>', "TK_GREATER_THAN");
-        OPERATORS_TOKEN.put('=', "TK_EQUAL");
-        OPERATORS_TOKEN.put(',', "TK_COMMA");
+        OPERATORS_TOKEN.put("(", "TK_OPEN_PARENTHESIS");
+        OPERATORS_TOKEN.put(")", "TK_CLOSE_PARENTHESIS");
+        OPERATORS_TOKEN.put(".", "TK_DOT");
+        OPERATORS_TOKEN.put(":", "TK_COLON");
+        OPERATORS_TOKEN.put(";", "TK_SEMI_COLON");
+        OPERATORS_TOKEN.put("+", "TK_PLUS");
+        OPERATORS_TOKEN.put("-", "TK_MINUS");
+        OPERATORS_TOKEN.put("*", "TK_MULTIPLY");
+        OPERATORS_TOKEN.put("/", "TK_DIVIDE");
+        OPERATORS_TOKEN.put("<", "TK_LESS_THAN");
+        OPERATORS_TOKEN.put(">", "TK_GREATER_THAN");
+        OPERATORS_TOKEN.put(":=", "TK_ASSIGNMENT");
+        OPERATORS_TOKEN.put(",", "TK_COMMA");
+        OPERATORS_TOKEN.put("=", "TK_EQUAL");
     }
 
-    private static final HashMap<Character, Integer> CHAR_TYPE;
+    private static final HashMap<String, Integer> CHAR_TYPE;
     static {
         CHAR_TYPE = new HashMap<>();
 
         for (int i = 65; i < 91; i++){
             // Add letters
-            char currentChar = Character.toChars(i)[0];
+            String currentChar = String.valueOf(Character.toChars(i)[0]);
             CHAR_TYPE.put(currentChar, LETTER);
-            CHAR_TYPE.put(Character.toLowerCase(currentChar), LETTER);
+            CHAR_TYPE.put(currentChar.toLowerCase(), LETTER);
         }
         for (int i = 48; i < 58; i++){
             // Add digits
-            char currentChar = Character.toChars(i)[0];
+            String currentChar = String.valueOf(Character.toChars(i)[0]);
             CHAR_TYPE.put(currentChar, DIGIT);
         }
         for (int i = 1; i < 33; i++){
             // Add spaces
-            char currentChar = Character.toChars(i)[0];
+            String currentChar = String.valueOf(Character.toChars(i)[0]);
             CHAR_TYPE.put(currentChar, SPACE);
         }
 
-        for (Character key: OPERATORS_TOKEN.keySet()) {
+        for (String key: OPERATORS_TOKEN.keySet()) {
             CHAR_TYPE.put(key, OPERATOR);
         }
 
         // Add signle quote
-        CHAR_TYPE.put(Character.toChars(39)[0], QUOTE);
+        CHAR_TYPE.put(String.valueOf(Character.toChars(39)[0]), QUOTE);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -89,13 +92,14 @@ public class TokenScanner {
         while (sc.hasNext()) {
             char element = sc.next().charAt(0);
 
-            switch (CHAR_TYPE.get(element)){
+            switch (CHAR_TYPE.get(String.valueOf(element))){
                 case LETTER:
                     if (!readingNumber) {
                         tokenName += element;
                     }
 
                     if (element == 'E' && readingNumber) {
+                        tokenName += element;
                         sciNotation = true;
                     }
 
@@ -114,6 +118,11 @@ public class TokenScanner {
                     if (readingString){
                         // Append to a string
                         tokenName += element;
+                    } else if (readingColon) {
+                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+                        tokenName = "";
+                        readingColon = false;
+
                     } else if (!readingNumber && !readingString) {
                         // End of word
                         tokenName = endOfWord();
@@ -132,6 +141,8 @@ public class TokenScanner {
                     if (readingString) {
                         // Append to a string
                         tokenName += element;
+                        System.out.println("1");
+
                     } else if (readingNumber) {
 
                         if (sciNotation && (element == '+' || element == '-')) {
@@ -149,19 +160,28 @@ public class TokenScanner {
                                 System.out.println("TK_INTLIT: " + tokenName);
                             }
 
-                            System.out.println(OPERATORS_TOKEN.get(element));
+                            System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
                             tokenName = "";
                         }
+                    } else if (readingColon && element == '=') {
+
+                        // Handle assignment
+                        tokenName += element;
+                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+                        readingColon = false;
+                        tokenName = "";
                     } else {
 
                         if (element == ';') {
                             // Before end of line
                             tokenName = endOfWord();
-                        }
-
-                        if (OPERATORS_TOKEN.containsKey(element)) {
+                        } else if (element == ':') {
                             tokenName = endOfWord();
-                            System.out.println(OPERATORS_TOKEN.get(element));
+                            readingColon = true;
+                            tokenName += element;
+                        } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
+                            tokenName = endOfWord();
+                            System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
                         }
                     }
                     lineCol++;
