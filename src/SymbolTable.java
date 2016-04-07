@@ -24,21 +24,13 @@ public class SymbolTable {
 
     public static void insert(Token token){
         int hashValue = hash(token.getTokenValue());
-        Token element = symbolTable[hashValue];
+        token.next = symbolTable[hashValue];
 
-        if (element == null) {
-            symbolTable[hashValue] = token;
-        } else {
-            // Existing token at the hashValue
+        symbolTable[hashValue] = token;
 
-            while(element.next != null){
-                // Continue through the bucket until the next element is null
-                element = element.next;
-            }
+        token.scopeLink = scopeList.scopeLink;
+        scopeList.scopeLink = token;
 
-            element.next = token;
-
-        }
     }
 
     public static Token lookup(Token token){
@@ -66,7 +58,7 @@ public class SymbolTable {
         return h;
     }
 
-    public static void createScope() {
+    public static void openScope() {
         Scope s = new Scope();
         s.next = scopeList;
         scopeList = s;
