@@ -12,11 +12,8 @@ G -> M#     // # indicates EOF token
 public class Parser {
     // TODO: Generate p_code
 
-    static class TYPE {
-        private static final int I = 0; // integer
-        private static final int R = 1; // real
-        private static final int B = 2; // boolean
-        private static final int C = 3; // character
+    enum TYPE {
+        I, R, B, C
     }
 
     private static Token currentToken;
@@ -52,8 +49,4 @@ public class Parser {
         //
         return SymbolTable.getScopeList().scopeLink;
     }
-
-
-
-
 }

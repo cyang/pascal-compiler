@@ -14,11 +14,9 @@ public class TokenScanner {
     private static boolean sciNotation = false;
     private static boolean readingColon = false;
 
-    private static final int LETTER = 0;
-    private static final int DIGIT = 1;
-    private static final int SPACE = 2;
-    private static final int OPERATOR = 3;
-    private static final int QUOTE = 4;
+    enum TYPE {
+        LETTER, DIGIT, SPACE, OPERATOR, QUOTE
+    }
 
     private static final HashMap<String, String> KEYWORDS_TOKEN;
     static {
@@ -55,33 +53,33 @@ public class TokenScanner {
         OPERATORS_TOKEN.put("=", "TK_EQUAL");
     }
 
-    private static final HashMap<String, Integer> CHAR_TYPE;
+    private static final HashMap<String, TYPE> CHAR_TYPE;
     static {
         CHAR_TYPE = new HashMap<>();
 
         for (int i = 65; i < 91; i++){
             // Add letters
             String currentChar = String.valueOf(Character.toChars(i)[0]);
-            CHAR_TYPE.put(currentChar, LETTER);
-            CHAR_TYPE.put(currentChar.toLowerCase(), LETTER);
+            CHAR_TYPE.put(currentChar, TYPE.LETTER);
+            CHAR_TYPE.put(currentChar.toLowerCase(), TYPE.LETTER);
         }
         for (int i = 48; i < 58; i++){
             // Add digits
             String currentChar = String.valueOf(Character.toChars(i)[0]);
-            CHAR_TYPE.put(currentChar, DIGIT);
+            CHAR_TYPE.put(currentChar, TYPE.DIGIT);
         }
         for (int i = 1; i < 33; i++){
             // Add spaces
             String currentChar = String.valueOf(Character.toChars(i)[0]);
-            CHAR_TYPE.put(currentChar, SPACE);
+            CHAR_TYPE.put(currentChar, TYPE.SPACE);
         }
 
         for (String key: OPERATORS_TOKEN.keySet()) {
-            CHAR_TYPE.put(key, OPERATOR);
+            CHAR_TYPE.put(key, TYPE.OPERATOR);
         }
 
         // Add signle quote
-        CHAR_TYPE.put(String.valueOf(Character.toChars(39)[0]), QUOTE);
+        CHAR_TYPE.put(String.valueOf(Character.toChars(39)[0]), TYPE.QUOTE);
     }
 
     public static void main(String[] args) throws FileNotFoundException {
@@ -230,5 +228,10 @@ public class TokenScanner {
         readingNumber = false;
         isFloat = false;
         sciNotation = false;
+    }
+
+    public static void createToken(String tokenType){
+        Token t = new Token(tokenType, tokenName, lineCol, lineRow);
+        SymbolTable.insert(t);
     }
 }

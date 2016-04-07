@@ -4,6 +4,7 @@
 
 public class SymbolTable {
     //TODO: incorporate level into Token class
+    // May need to create new symbolTable for each scope
 
     static class Scope {
         Token scopeLink = null; // pointer to latest token for current scope
