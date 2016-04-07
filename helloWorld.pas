@@ -1,5 +1,5 @@
 program helloWorld;
-var s: string;
+var s, lol: string;
 var i: int;
 
 begin

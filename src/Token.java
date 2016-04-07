@@ -5,7 +5,8 @@ public class Token {
     private int lineCol;
     private int lineRow;
 
-    private Token next = null;
+    Token next = null;
+    Token scopeLink = null;
 
     public Token(String tokenType, String tokenValue, int lineCol, int lineRow){
         this.tokenType = tokenType;
@@ -50,13 +51,5 @@ public class Token {
 
     public void setLineRow(int lineRow) {
         this.lineRow = lineRow;
-    }
-
-    public Token getNext() {
-        return next;
-    }
-
-    public void setNext(Token next) {
-        this.next = next;
     }
 }
