@@ -5,8 +5,8 @@ public class Token {
     private int lineCol;
     private int lineRow;
 
-    Token next = null;
-    Token scopeLink = null;
+    Token next = null; // pointer to the next entry in the symbolTable bucket list
+    Token scopeLink = null; // pointer to the next Token in the current scope
 
     public Token(String tokenType, String tokenValue, int lineCol, int lineRow){
         this.tokenType = tokenType;

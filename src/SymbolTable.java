@@ -4,24 +4,17 @@
 
 public class SymbolTable {
     //TODO: incorporate level into Token class
-    
+
     static class Scope {
         Token scopeLink = null; // pointer to latest token for current scope
         Scope next = null; // pointer to the outer scope
     }
 
-    static int level;
-    private static Scope scopeList;
+    static int level = 0;
 
     private static final int HASH_TABLE_SIZE = 200;
-
-    private static Token[] symbolTable;
-
-    public SymbolTable(){
-        symbolTable = new Token[HASH_TABLE_SIZE];
-        scopeList = new Scope();
-        level = 0;
-    }
+    private static Token[] symbolTable = new Token[HASH_TABLE_SIZE];
+    private static Scope scopeList = new Scope();
 
     public static void insert(Token token){
         int hashValue = hash(token.getTokenValue());
@@ -99,6 +92,21 @@ public class SymbolTable {
         s.next = null;
         s.scopeLink = null;
         level--;
+    }
 
+    public static int getLevel() {
+        return level;
+    }
+
+    public static Scope getScopeList() {
+        return scopeList;
+    }
+
+    public static int getHashTableSize() {
+        return HASH_TABLE_SIZE;
+    }
+
+    public static Token[] getSymbolTable() {
+        return symbolTable;
     }
 }
