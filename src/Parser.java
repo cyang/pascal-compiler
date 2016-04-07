@@ -45,8 +45,8 @@ public class Parser {
     }
 
     // TODO: Get next token
-    public Token getToken() {
-        //
-        return SymbolTable.getScopeList().scopeLink;
-    }
+//    public Token getToken() {
+//        //
+//        return SymbolTable.getHeaderScope().s;
+//    }
 }

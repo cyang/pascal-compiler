@@ -198,9 +198,7 @@ public class TokenScanner {
                     lineCol++;
                     break;
                 default:
-                    //TODO throw an error for unhandled element
                     throw new Error("Unhandled element scanned");
-
             }
         }
 
