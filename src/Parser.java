@@ -9,6 +9,9 @@ G -> M#     // # indicates EOF token
 
 */
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public final class Parser {
     // TODO: Generate p_code
 
@@ -17,6 +20,14 @@ public final class Parser {
     }
 
     private static Token currentToken;
+    private static ArrayList<Token> tokenArrayList;
+    private static Iterator<Token> it;
+
+    public static void parse() {
+        // TODO: Test
+        currentToken = getToken();
+        System.out.println(currentToken);
+    }
 
     // TODO: Write grammar
 //    public static TYPE E() {
@@ -44,9 +55,15 @@ public final class Parser {
 //
 //    }
 
-    // TODO: Get next token
-//    public Token getToken() {
-//        //
-//        return SymbolTable.getHeaderScope().s;
-//    }
+    public static Token getToken() {
+        if (it.hasNext()) {
+            return it.next();
+        }
+        return null;
+    }
+
+    public static void setTokenArrayList(ArrayList<Token> tokenArrayList) {
+        Parser.tokenArrayList = tokenArrayList;
+        it = tokenArrayList.iterator();
+    }
 }
