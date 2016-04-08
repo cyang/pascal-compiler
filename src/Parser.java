@@ -9,7 +9,7 @@ G -> M#     // # indicates EOF token
 
 */
 
-public class Parser {
+public final class Parser {
     // TODO: Generate p_code
 
     enum TYPE {

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class TokenScanner {
+public final class TokenScanner {
 
     private static String tokenName = "";
     private static int lineRow = 0;
@@ -85,127 +85,133 @@ public class TokenScanner {
         CHAR_TYPE.put(String.valueOf(Character.toChars(39)[0]), TYPE.QUOTE);
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-
+    public static ArrayList<Token> scan(File file) throws FileNotFoundException {
         // Delimiter to scan each char
-        Scanner sc = new Scanner(new File(args[0])).useDelimiter("");
+        Scanner sc = new Scanner(file).useDelimiter("");
 
         while (sc.hasNext()) {
             char element = sc.next().charAt(0);
 
-            switch (CHAR_TYPE.get(String.valueOf(element))){
-                case LETTER:
-                    if (!readingNumber) {
-                        tokenName += element;
-                    }
-
-                    if (element == 'E' && readingNumber) {
-                        tokenName += element;
-                        sciNotation = true;
-                    }
-
-                    lineCol++;
-                    break;
-                case DIGIT:
-                    if (tokenName.isEmpty()) {
-                        readingNumber = true;
-                    }
-
-                    tokenName += element;
-
-                    lineCol++;
-                    break;
-                case SPACE:
-                    if (readingString){
-                        // Append to a string
-                        tokenName += element;
-                    } else if (readingColon) {
-                        System.out.println(OPERATORS_TOKEN.get(tokenName));
-                        tokenName = "";
-                        readingColon = false;
-
-                    } else if (!readingNumber && !readingString) {
-                        // End of word
-                        tokenName = endOfWord();
-
-                        if (element == Character.toChars(10)[0]){
-                            // Check for newline on Unix OS
-                            lineRow++;
-                            lineCol = 0;
-                        } else {
-                            // Continue reading line
-                            lineCol++;
-                        }
-                    }
-                    break;
-                case OPERATOR:
-                    if (readingString) {
-                        // Append to a string
-                        tokenName += element;
-                        System.out.println("1");
-
-                    } else if (readingNumber) {
-
-                        if (sciNotation && (element == '+' || element == '-')) {
-                            tokenName += element;
-                        } else if (element == '.') {
-                            // Found decimal in float
-                            isFloat = true;
-                            tokenName += element;
-                        } else {
-                            readingNumber = false;
-                            if (isFloat) {
-                                System.out.println("TK_FLOATLIT: " + tokenName);
-                                isFloat = false;
-                            } else {
-                                System.out.println("TK_INTLIT: " + tokenName);
-                            }
-
-                            System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
-                            tokenName = "";
-                        }
-                    } else if (readingColon && element == '=') {
-
-                        // Handle assignment
-                        tokenName += element;
-                        System.out.println(OPERATORS_TOKEN.get(tokenName));
-                        readingColon = false;
-                        tokenName = "";
-                    } else {
-
-                        if (element == ';') {
-                            // Before end of line
-                            tokenName = endOfWord();
-                        } else if (element == ':') {
-                            tokenName = endOfWord();
-                            readingColon = true;
-                            tokenName += element;
-                        } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
-                            tokenName = endOfWord();
-                            System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
-                        }
-                    }
-                    lineCol++;
-                    break;
-                case QUOTE:
-                    // Found begin/end quote
-                    readingString = !readingString;
-                    tokenName += element;
-
-                    if (!readingString) {
-                        // Found end quote
-                        System.out.println("TK_STRLIT: " + tokenName );
-                        tokenName = "";
-                    }
-
-                    lineCol++;
-                    break;
-                default:
-                    throw new Error("Unhandled element scanned");
-            }
+            checkCharacter(element);
         }
 
         System.out.println("TK_EOF");
+
+        // TODO: Add tokens into list
+        return tokenArrayList;
+    }
+
+    public static void checkCharacter(char element){
+        switch (CHAR_TYPE.get(String.valueOf(element))){
+            case LETTER:
+                if (!readingNumber) {
+                    tokenName += element;
+                }
+
+                if (element == 'E' && readingNumber) {
+                    tokenName += element;
+                    sciNotation = true;
+                }
+
+                lineCol++;
+                break;
+            case DIGIT:
+                if (tokenName.isEmpty()) {
+                    readingNumber = true;
+                }
+
+                tokenName += element;
+
+                lineCol++;
+                break;
+            case SPACE:
+                if (readingString){
+                    // Append to a string
+                    tokenName += element;
+                } else if (readingColon) {
+                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+                    tokenName = "";
+                    readingColon = false;
+
+                } else if (!readingNumber && !readingString) {
+                    // End of word
+                    tokenName = endOfWord();
+
+                    if (element == Character.toChars(10)[0]){
+                        // Check for newline on Unix OS
+                        lineRow++;
+                        lineCol = 0;
+                    } else {
+                        // Continue reading line
+                        lineCol++;
+                    }
+                }
+                break;
+            case OPERATOR:
+                if (readingString) {
+                    // Append to a string
+                    tokenName += element;
+                    System.out.println("1");
+
+                } else if (readingNumber) {
+
+                    if (sciNotation && (element == '+' || element == '-')) {
+                        tokenName += element;
+                    } else if (element == '.') {
+                        // Found decimal in float
+                        isFloat = true;
+                        tokenName += element;
+                    } else {
+                        readingNumber = false;
+                        if (isFloat) {
+                            System.out.println("TK_FLOATLIT: " + tokenName);
+                            isFloat = false;
+                        } else {
+                            System.out.println("TK_INTLIT: " + tokenName);
+                        }
+
+                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
+                        tokenName = "";
+                    }
+                } else if (readingColon && element == '=') {
+
+                    // Handle assignment
+                    tokenName += element;
+                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+                    readingColon = false;
+                    tokenName = "";
+                } else {
+
+                    if (element == ';') {
+                        // Before end of line
+                        tokenName = endOfWord();
+                    } else if (element == ':') {
+                        tokenName = endOfWord();
+                        readingColon = true;
+                        tokenName += element;
+                    } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
+                        tokenName = endOfWord();
+                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
+                    }
+                }
+                lineCol++;
+                break;
+            case QUOTE:
+                // Found begin/end quote
+                readingString = !readingString;
+                tokenName += element;
+
+                if (!readingString) {
+                    // Found end quote
+                    System.out.println("TK_STRLIT: " + tokenName );
+                    tokenName = "";
+                }
+
+                lineCol++;
+                break;
+            default:
+                throw new Error("Unhandled element scanned");
+        }
     }
 
     public static String endOfWord(){

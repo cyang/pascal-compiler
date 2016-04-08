@@ -1,6 +1,6 @@
 
 
-public class SymbolTable {
+public final class SymbolTable {
 
     static class Scope {
         Token[] symbolTable = new Token[HASH_TABLE_SIZE]; // symbol table for the current scope
