@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -13,6 +14,8 @@ public class TokenScanner {
     private static boolean isFloat = false;
     private static boolean sciNotation = false;
     private static boolean readingColon = false;
+
+    private static ArrayList<Token> tokenArrayList = new ArrayList<>();
 
     enum TYPE {
         LETTER, DIGIT, SPACE, OPERATOR, QUOTE
@@ -228,8 +231,8 @@ public class TokenScanner {
         sciNotation = false;
     }
 
-    public static void createToken(String tokenType){
+    public static void generateToken(String tokenType){
         Token t = new Token(tokenType, tokenName, lineCol, lineRow);
-        SymbolTable.insert(t);
+        tokenArrayList.add(t);
     }
 }

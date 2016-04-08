@@ -35,14 +35,14 @@ public class Parser {
 //
 //    }
 
-    public void match(Token token) {
-        if (token != currentToken) {
-            throw new Error("The token does not match the current token");
-        } else {
-            currentToken = getToken();
-        }
-
-    }
+//    public void match(Token token) {
+//        if (token != currentToken) {
+//            throw new Error("The token does not match the current token");
+//        } else {
+//            currentToken = getToken();
+//        }
+//
+//    }
 
     // TODO: Get next token
 //    public Token getToken() {
