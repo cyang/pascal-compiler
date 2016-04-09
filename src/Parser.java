@@ -32,35 +32,38 @@ public final class Parser {
         match("TK_SEMI_COLON");
         System.out.println(currentToken);
 
+        if ("TK_VAR".equals(currentToken.getTokenType())) {
+            declarations();
+        } else {
+//            begin();
+        }
+    }
 
-//        switch (currentToken.getTokenType()) {
-//            case ("TK_VAR"):
-//                break;
-//            case ("TK_COLON"):
-//                break;
-//            case ("")
-//
-//
-//        }
+    public static void declarations() {
+        while(true) {
+            match("TK_VAR");
+
+            SymbolTable.insert(currentToken);
+            match("TK_IDENTIFIER");
+
+            if ("TK_COMMA".equals(currentToken.getTokenType())) {
+                match("TK_COMMA");
+            } else if ("TK_COLON".equals(currentToken.getTokenType())) {
+                match("TK_COLON");
+
+
+            }
+
+
+
+            if ("TK_SEMI_COLON".equals(currentToken.getTokenType())) {
+                match("TK_SEMI_COLON");
+                break;
+            }
+        }
 
     }
 
-    // TODO: Write grammar
-//    public static TYPE E() {
-//
-//    }
-//
-//    public static TYPE T() {
-//
-//    }
-//
-//    public static TYPE F() {
-//
-//
-//    }
-//    public static void M() {
-//
-//    }
 
     public static Token getToken() {
         if (it.hasNext()) {

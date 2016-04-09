@@ -186,7 +186,6 @@ public final class TokenScanner {
 
                     readingColon = false;
                 } else {
-
                     if (element == ';') {
                         // Before end of line
                         tokenName = endOfWord();
@@ -201,7 +200,9 @@ public final class TokenScanner {
                     } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
                         tokenName = endOfWord();
                         System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
-                        OPERATORS_TOKEN.get(OPERATORS_TOKEN.get(String.valueOf(element)));
+
+                        tokenName = String.valueOf(element);
+                        generateToken(OPERATORS_TOKEN.get(tokenName));
                     }
                 }
                 lineCol++;
