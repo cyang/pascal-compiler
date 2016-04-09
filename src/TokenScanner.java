@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public final class TokenScanner {
+    // TODO Fix lineCol and lineRow
+
 
     private static String tokenName = "";
     private static int lineRow = 0;
@@ -188,6 +190,10 @@ public final class TokenScanner {
                     if (element == ';') {
                         // Before end of line
                         tokenName = endOfWord();
+
+                        tokenName = ";";
+                        generateToken(OPERATORS_TOKEN.get(String.valueOf(element)));
+                        System.out.println("TK_SEMI_COLON");
                     } else if (element == ':') {
                         tokenName = endOfWord();
                         readingColon = true;

@@ -20,6 +20,10 @@ public final class Token {
         return tokenValue;
     }
 
+//    public boolean equals(Token rhs) {
+//        return (this.getTokenType().equals(rhs.getTokenType()) && (this.getTokenValue().equals(rhs.getTokenValue())));
+//    }
+
     public String getTokenType() {
         return tokenType;
     }

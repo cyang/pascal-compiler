@@ -25,8 +25,24 @@ public final class Parser {
 
     public static void parse() {
         // TODO: Test
-        currentToken = getToken();
+        currentToken = getToken(); // Get initial token
+
+        match("TK_PROGRAM");
+        match("TK_IDENTIFIER");
+        match("TK_SEMI_COLON");
         System.out.println(currentToken);
+
+
+//        switch (currentToken.getTokenType()) {
+//            case ("TK_VAR"):
+//                break;
+//            case ("TK_COLON"):
+//                break;
+//            case ("")
+//
+//
+//        }
+
     }
 
     // TODO: Write grammar
@@ -46,20 +62,20 @@ public final class Parser {
 //
 //    }
 
-//    public void match(Token token) {
-//        if (token != currentToken) {
-//            throw new Error("The token does not match the current token");
-//        } else {
-//            currentToken = getToken();
-//        }
-//
-//    }
-
     public static Token getToken() {
         if (it.hasNext()) {
             return it.next();
         }
         return null;
+    }
+
+    public static void match(String tokenType) {
+        if (!tokenType.equals(currentToken.getTokenType())) {
+            throw new Error("The token does not match the current token");
+        } else {
+            currentToken = getToken();
+        }
+
     }
 
     public static void setTokenArrayList(ArrayList<Token> tokenArrayList) {
