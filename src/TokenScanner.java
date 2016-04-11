@@ -215,7 +215,7 @@ public final class TokenScanner {
                 if (!readingString) {
                     // Found end quote
                     System.out.println("TK_STRLIT: " + tokenName );
-                    generateToken(OPERATORS_TOKEN.get("TK_STRLIT"));
+                    generateToken("TK_STRLIT");
                 }
 
                 lineCol++;

@@ -48,6 +48,9 @@ public final class Parser {
 
             if ("TK_COMMA".equals(currentToken.getTokenType())) {
                 match("TK_COMMA");
+            } else if ("TK_IDENTIFIER".equals(currentToken.getTokenType())){
+                SymbolTable.insert(currentToken);
+                match("TK_IDENTIFIER");
             } else if ("TK_COLON".equals(currentToken.getTokenType())) {
                 match("TK_COLON");
 

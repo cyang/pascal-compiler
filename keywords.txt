@@ -52,3 +52,8 @@ while
 with
 xor
 writeln
+string
+integer
+real
+boolean
+character

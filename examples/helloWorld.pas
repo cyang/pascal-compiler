@@ -1,6 +1,6 @@
 program helloWorld;
 var s, lol: string;
-var i: int;
+var i: real;
 
 begin
     s := 'Hello World';
