@@ -97,7 +97,7 @@ public final class TokenScanner {
             checkCharacter(element);
         }
 
-        System.out.println("TK_EOF");
+        tokenName = "EOF";
         generateToken("TK_EOF");
 
         return tokenArrayList;

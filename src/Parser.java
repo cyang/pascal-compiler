@@ -9,6 +9,8 @@ G -> M#     // # indicates EOF token
 
 */
 
+import sun.jvm.hotspot.debugger.cdbg.Sym;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -24,7 +26,6 @@ public final class Parser {
     private static Iterator<Token> it;
 
     public static void parse() {
-        // TODO: Test
         currentToken = getToken(); // Get initial token
 
         match("TK_PROGRAM");
@@ -40,31 +41,33 @@ public final class Parser {
     }
 
     public static void declarations() {
-        while(true) {
-            match("TK_VAR");
+        match("TK_VAR");
 
-            SymbolTable.insert(currentToken);
+        // Store identifers in a list
+        ArrayList<Token> identifierArrayList = new ArrayList<>();
+
+        while ("TK_IDENTIFIER".equals(currentToken.getTokenType())) {
+
+            identifierArrayList.add(currentToken);
+
             match("TK_IDENTIFIER");
 
             if ("TK_COMMA".equals(currentToken.getTokenType())) {
                 match("TK_COMMA");
-            } else if ("TK_IDENTIFIER".equals(currentToken.getTokenType())){
-                SymbolTable.insert(currentToken);
-                match("TK_IDENTIFIER");
-            } else if ("TK_COLON".equals(currentToken.getTokenType())) {
-                match("TK_COLON");
-
-
-            }
-
-
-
-            if ("TK_SEMI_COLON".equals(currentToken.getTokenType())) {
-                match("TK_SEMI_COLON");
-                break;
             }
         }
 
+        match("TK_COLON");
+        String dataType = currentToken.getTokenType();
+        match(dataType);
+
+        // Add the correct datatype for each identifier and insert into symbol table
+        for (Token identifier: identifierArrayList) {
+            identifier.setTokenType(dataType);
+            SymbolTable.insert(identifier);
+        }
+
+        match("TK_SEMI_COLON");
     }
 
 
