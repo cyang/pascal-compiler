@@ -28,7 +28,7 @@ public final class SymbolTable {
         }
     }
 
-    public static Token lookup(Token token) {
+    public static boolean lookup(Token token) {
         int hashValue = hash(token.getTokenValue());
         Token bucketCursor = headerScope.symbolTable[hashValue];
         Scope scopeCursor = headerScope;
@@ -36,7 +36,7 @@ public final class SymbolTable {
         while (scopeCursor != null) {
             while (bucketCursor != null) {
                 if (bucketCursor.getTokenValue().equals(token.getTokenValue())) {
-                    return bucketCursor;
+                    return true;
                 }
                 bucketCursor = bucketCursor.next;
             }
@@ -44,7 +44,7 @@ public final class SymbolTable {
         }
 
         // Token does not exist
-        return null;
+        return false;
     }
 
     public static int hash(String tokenValue) {

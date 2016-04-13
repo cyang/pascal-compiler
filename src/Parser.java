@@ -31,19 +31,19 @@ public final class Parser {
         match("TK_PROGRAM");
         match("TK_IDENTIFIER");
         match("TK_SEMI_COLON");
-        System.out.println(currentToken);
 
-        if ("TK_VAR".equals(currentToken.getTokenType())) {
-            declarations();
-        } else {
-//            begin();
-        }
+        declarations();
+        begin();
     }
 
     public static void declarations() {
-        match("TK_VAR");
+        if ("TK_VAR".equals(currentToken.getTokenType())) {
+            match("TK_VAR");
+        } else {
+            return;
+        }
 
-        // Store identifers in a list
+        // Store identifiers in a list
         ArrayList<Token> identifierArrayList = new ArrayList<>();
 
         while ("TK_IDENTIFIER".equals(currentToken.getTokenType())) {
@@ -64,9 +64,32 @@ public final class Parser {
         // Add the correct datatype for each identifier and insert into symbol table
         for (Token identifier: identifierArrayList) {
             identifier.setTokenType(dataType);
-            SymbolTable.insert(identifier);
+            if (!SymbolTable.lookup(identifier)) {
+                SymbolTable.insert(identifier);
+            }
         }
 
+        match("TK_SEMI_COLON");
+        declarations();
+    }
+
+    public static void begin(){
+        match("TK_BEGIN");
+        statements();
+        match("TK_END");
+    }
+
+    public static void statements(){
+
+    }
+
+    public static void writeln(){
+        match("TK_WRITELN");
+        match("TK_OPEN_PARENTHESIS");
+
+        // TODO
+
+        match("TK_CLOSE_PARENTHESIS");
         match("TK_SEMI_COLON");
     }
 
@@ -82,6 +105,7 @@ public final class Parser {
         if (!tokenType.equals(currentToken.getTokenType())) {
             throw new Error("The token does not match the current token");
         } else {
+            System.out.println(String.format("matched: %s", currentToken.getTokenType()));
             currentToken = getToken();
         }
 
