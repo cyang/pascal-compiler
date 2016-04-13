@@ -43,3 +43,5 @@ crashlytics-build.properties
 fabric.properties
 
 .idea/
+*.class
+*.o
