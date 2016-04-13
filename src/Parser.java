@@ -89,9 +89,11 @@ public final class Parser {
             // Add the correct datatype for each identifier and insert into symbol table
             for (Token identifier : identifierArrayList) {
                 identifier.setTokenType("TK_A_VAR");
-                identifier.setDataType(dataType);
-                if (!SymbolTable.lookup(identifier)) {
-                    SymbolTable.insert(identifier);
+
+                Symbol symbol = new Symbol(identifier.getTokenValue(), dataType.toLowerCase().substring(3));
+
+                if (!SymbolTable.lookup(symbol)) {
+                    SymbolTable.insert(symbol);
                 }
             }
 

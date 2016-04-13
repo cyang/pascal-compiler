@@ -1,10 +1,9 @@
 public final class Token {
-    private String tokenType;
-    private String tokenValue;
-    private String dataType = "";
+    private String tokenType= "";
+    private String tokenValue = "";
 
-    private int lineCol;
-    private int lineRow;
+    private int lineCol = 0;
+    private int lineRow = 0;
 
     public Token(String tokenType, String tokenValue, int lineCol, int lineRow){
         this.tokenType = tokenType;
@@ -53,13 +52,5 @@ public final class Token {
 
     public void setLineRow(int lineRow) {
         this.lineRow = lineRow;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
     }
 }

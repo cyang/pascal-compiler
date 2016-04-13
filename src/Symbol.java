@@ -1,12 +1,14 @@
-/**
- * Created by ChrisYang on 4/13/16.
- */
 public class Symbol {
-    private String name;
-    private String dataType;
-    private Object value;
+    private String name = "";
+    private String dataType = "";
+    private Object value = null;
 
     Symbol next; // pointer to the next entry in the symbolTable bucket list
+
+    public Symbol(String name, String dataType){
+        this.name = name;
+        this.dataType = dataType;
+    }
 
     public String getName() {
         return name;
