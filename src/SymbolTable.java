@@ -1,41 +1,39 @@
-
-
 public final class SymbolTable {
 
     static class Scope {
-        Token[] symbolTable = new Token[HASH_TABLE_SIZE]; // symbol table for the current scope
+        Symbol[] symbolTable = new Symbol[HASH_TABLE_SIZE]; // symbol table for the current scope
         Scope next = null; // pointer to the next outer scope
     }
 
     private static final int HASH_TABLE_SIZE = 211;
     private static Scope headerScope = new Scope();
 
-    public static void insert(Token token) {
-        int hashValue = hash(token.getTokenValue());
+    public static void insert(Symbol symbol) {
+        int hashValue = hash(symbol.getName());
 
-        Token bucketCursor = headerScope.symbolTable[hashValue];
+        Symbol bucketCursor = headerScope.symbolTable[hashValue];
         if (bucketCursor == null) {
             // Empty bucket
-            headerScope.symbolTable[hashValue] = token;
+            headerScope.symbolTable[hashValue] = symbol;
         } else {
-            // Existing Tokens in bucket
+            // Existing Symbols in bucket
             while (bucketCursor.next != null) {
                 bucketCursor = bucketCursor.next;
             }
 
-            // Append token at the end of the bucket
-            bucketCursor.next = token;
+            // Append symbol at the end of the bucket
+            bucketCursor.next = symbol;
         }
     }
 
-    public static boolean lookup(Token token) {
-        int hashValue = hash(token.getTokenValue());
-        Token bucketCursor = headerScope.symbolTable[hashValue];
+    public static boolean lookup(Symbol symbol) {
+        int hashValue = hash(symbol.getName());
+        Symbol bucketCursor = headerScope.symbolTable[hashValue];
         Scope scopeCursor = headerScope;
 
         while (scopeCursor != null) {
             while (bucketCursor != null) {
-                if (bucketCursor.getTokenValue().equals(token.getTokenValue())) {
+                if (bucketCursor.getName().equals(symbol.getName())) {
                     return true;
                 }
                 bucketCursor = bucketCursor.next;
@@ -43,14 +41,14 @@ public final class SymbolTable {
             scopeCursor = scopeCursor.next;
         }
 
-        // Token does not exist
+        // Symbol does not exist
         return false;
     }
 
-    public static int hash(String tokenValue) {
+    public static int hash(String symbolName) {
         int h = 0;
-        for (int i = 0; i < tokenValue.length(); i++) {
-            h = h + h + tokenValue.charAt(i);
+        for (int i = 0; i < symbolName.length(); i++) {
+            h = h + h + symbolName.charAt(i);
         }
 
         h = h % HASH_TABLE_SIZE;

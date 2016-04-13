@@ -1,11 +1,10 @@
 public final class Token {
     private String tokenType;
     private String tokenValue;
+    private String dataType = "";
 
     private int lineCol;
     private int lineRow;
-
-    Token next = null; // pointer to the next entry in the symbolTable bucket list
 
     public Token(String tokenType, String tokenValue, int lineCol, int lineRow){
         this.tokenType = tokenType;
@@ -54,5 +53,13 @@ public final class Token {
 
     public void setLineRow(int lineRow) {
         this.lineRow = lineRow;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 }
