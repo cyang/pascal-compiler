@@ -26,7 +26,7 @@ public final class SymbolTable {
         }
     }
 
-    public static boolean lookup(Symbol symbol) {
+    public static Symbol lookup(Symbol symbol) {
         int hashValue = hash(symbol.getName());
         Symbol bucketCursor = headerScope.symbolTable[hashValue];
         Scope scopeCursor = headerScope;
@@ -34,7 +34,7 @@ public final class SymbolTable {
         while (scopeCursor != null) {
             while (bucketCursor != null) {
                 if (bucketCursor.getName().equals(symbol.getName())) {
-                    return true;
+                    return bucketCursor;
                 }
                 bucketCursor = bucketCursor.next;
             }
@@ -42,7 +42,7 @@ public final class SymbolTable {
         }
 
         // Symbol does not exist
-        return false;
+        return null;
     }
 
     public static int hash(String symbolName) {

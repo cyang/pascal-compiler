@@ -1,16 +1,19 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Iterator;
 
-/**
- * Created by ChrisYang on 4/7/16.
- */
 public final class Emulator {
 
     public static void main(String[] args) throws FileNotFoundException {
+        System.out.println("Scanner output:");
         ArrayList<Token> tokenArrayList = TokenScanner.scan(new File(args[0]));
+
+        System.out.println("\n Parser output:");
         Parser.setTokenArrayList(tokenArrayList);
+
+
+        byte b = (byte) 32;
+        System.out.println(b);
 
         Parser.parse();
     }
