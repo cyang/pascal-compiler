@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -215,44 +216,47 @@ public final class Parser {
         }
     }
 
-//    public static void condition(){
-//        TYPE t= E();
-//        if (t != B)
-//            error();
-//    }
+    public static void condition(){
+        TYPE t= E();
+        if (t != B)
+            error();
+    }
 
-//    public static void assignmentStat() {
-//        //save type, address into LHS_type, LHS_addr
-//        TYPE LHSType = SymbolTable.lookup()
-//        getToken();
-//        match("TK_ASSIGNMENT");
-//
-//        TYPE RHS_type = E();
-//
-//        compare LHS_type and RHS_type
-//
-//        generate pop of LHS_addr
-//    }
-//
-//    public static TYPE E(){
-//        TYPE t1 = T();
-//        while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
-//            String op = currentToken.getTokenType();
-//            match(op);
-//            TYPE t2 = T();
-//
-//            t1 = emit(op, t1, t2);
-//        }
-//
-//    }
+    public static void assignmentStat() {
+        //save type, address into LHS_type, LHS_addr
+        TYPE LHSType = SymbolTable.lookup()
+        getToken();
+        match("TK_ASSIGNMENT");
+
+        TYPE RHS_type = E();
+
+        compare LHS_type and RHS_type
+
+        generate pop of LHS_addr
+    }
+
+    public static TYPE E(){
+        TYPE t1 = T();
+        while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
+            String op = currentToken.getTokenType();
+            match(op);
+            TYPE t2 = T();
+
+            t1 = emit(op, t1, t2);
+        }
+
+    }
 
     public static void genAddress(int a){
-        p_code[ip] = (byte) a;
-        ip+=4;
+        byte[] intBytes = ByteBuffer.allocate(4).putInt(a).array();
+
+        for (byte b: intBytes) {
+            p_code[ip++] = b;
+        }
     }
 
     public static void genOpcode(String b){
-        p_code[ip++]= Byte.valueOf(b);
+        p_code[ip++] = Byte.valueOf(b);
     }
 
     public static void getToken() {

@@ -11,10 +11,6 @@ public final class Emulator {
         System.out.println("\n Parser output:");
         Parser.setTokenArrayList(tokenArrayList);
 
-
-        byte b = (byte) 32;
-        System.out.println(b);
-
         Parser.parse();
     }
 }
