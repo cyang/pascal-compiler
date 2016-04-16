@@ -1,3 +1,5 @@
+import sun.jvm.hotspot.debugger.cdbg.Sym;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -87,11 +89,10 @@ public final class Parser {
 
             // Add the correct datatype for each identifier and insert into symbol table
             for (Token identifier : identifierArrayList) {
-                identifier.setTokenType("TK_A_VAR");
 
                 Symbol symbol = new Symbol(identifier.getTokenValue(), dataType.toLowerCase().substring(3));
 
-                if (SymbolTable.lookup(symbol) == null) {
+                if (SymbolTable.lookup(identifier.getTokenValue()) == null) {
                     SymbolTable.insert(symbol);
                 }
             }
@@ -141,7 +142,13 @@ public final class Parser {
             case "TK_WRITELN":
                 writeStat();
                 break;
+            case "TK_IDENTIFIER":
+                assignmentStat();
+            default:
+                break;
         }
+
+
     }
 
     private static void forStat() {
@@ -211,7 +218,7 @@ public final class Parser {
                     getToken();
                     return;
                 default:
-                    throw new Error(String.format("Token: %s is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
+                    throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
             }
         }
     }
@@ -223,27 +230,48 @@ public final class Parser {
     }
 
     public static void assignmentStat() {
-        //save type, address into LHS_type, LHS_addr
-        TYPE LHSType = SymbolTable.lookup()
-        getToken();
-        match("TK_ASSIGNMENT");
+        Token lhsAddress = currentToken;
+        Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
 
-        TYPE RHS_type = E();
+        if (symbol != null) {
+            String lhsType = "";
 
-        compare LHS_type and RHS_type
+            lhsType = symbol.getDataType();
 
-        generate pop of LHS_addr
+
+            getToken();
+            match("TK_ASSIGNMENT");
+
+            String rhsType = E();
+            if (lhsType.equals(rhsType)) {
+                symbol.setValue(currentToken.getTokenValue());
+            } else {
+                throw new Error(String.format("LHS type (%s) is not equal to RHS type: (%s)", lhsType, rhsType));
+            }
+
+            //TODO generate pop of LHS_addr
+            genOpcode("OP_POP");
+            genAddress(lhsAddress);
+
+
+        }
+
+
     }
 
-    public static TYPE E(){
-        TYPE t1 = T();
+    public static String E(){
+        String t1 = T();
         while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
             String op = currentToken.getTokenType();
             match(op);
-            TYPE t2 = T();
+            String t2 = T();
 
             t1 = emit(op, t1, t2);
         }
+
+    }
+
+    public static void emit(String op, String t1, String t2){
 
     }
 
@@ -267,7 +295,7 @@ public final class Parser {
 
     public static void match(String tokenType) {
         if (!tokenType.equals(currentToken.getTokenType())) {
-            throw new Error(String.format("The token: %s does not match the current token: %s", tokenType, currentToken.getTokenType()));
+            throw new Error(String.format("Token type (%s) does not match current token type (%s)", tokenType, currentToken.getTokenType()));
         } else {
             System.out.println(String.format("matched: %s", currentToken.getTokenType()));
             getToken();

@@ -26,14 +26,14 @@ public final class SymbolTable {
         }
     }
 
-    public static Symbol lookup(Symbol symbol) {
-        int hashValue = hash(symbol.getName());
+    public static Symbol lookup(String symbolName) {
+        int hashValue = hash(symbolName);
         Symbol bucketCursor = headerScope.symbolTable[hashValue];
         Scope scopeCursor = headerScope;
 
         while (scopeCursor != null) {
             while (bucketCursor != null) {
-                if (bucketCursor.getName().equals(symbol.getName())) {
+                if (bucketCursor.getName().equals(symbolName)) {
                     return bucketCursor;
                 }
                 bucketCursor = bucketCursor.next;
