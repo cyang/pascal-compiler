@@ -1,21 +1,43 @@
-import sun.jvm.hotspot.debugger.cdbg.Sym;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public final class Parser {
-    // TODO: Generate p_code
+    /*
+    TODO: Generate p_code for
+        repeat
+         for
+         if
+         while
+     */
+
 
     enum TYPE {
         I, R, B, C
     }
 
+    enum OP_CODES {
+        PUSHI, PUSH, POP,
+        JMP, JFALSE, JTRUE,
+        CVR, CVI,
+        DUP, XCHG, REMOVE,
+        ADD, SUB, MULT, DIV, NEG,
+        OR, AND,
+        FADD, FSUB, FMULT, FDIV, FNEG,
+        EQL, GEQ, LEQ, GTR, LSS,
+        FGTR, FLSS,
+        HALT
+    }
+
+    private static final int ADDRESS_SIZE = 4;
+
     private static Token currentToken;
     private static ArrayList<Token> tokenArrayList;
     private static Iterator<Token> it;
 
-    private static Byte p_code[] = new Byte[211];
+    private static final int INSTRUCTION_SIZE = 211;
+
+    private static Byte[] p_code = new Byte[INSTRUCTION_SIZE];
     private static int ip = 0;
 
     public static void parse() {
@@ -230,7 +252,7 @@ public final class Parser {
     }
 
     public static void assignmentStat() {
-        Token lhsAddress = currentToken;
+        int lhsAddress = ip;
         Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
 
         if (symbol != null) {
@@ -249,11 +271,8 @@ public final class Parser {
                 throw new Error(String.format("LHS type (%s) is not equal to RHS type: (%s)", lhsType, rhsType));
             }
 
-            //TODO generate pop of LHS_addr
             genOpcode("OP_POP");
             genAddress(lhsAddress);
-
-
         }
 
 
@@ -276,15 +295,15 @@ public final class Parser {
     }
 
     public static void genAddress(int a){
-        byte[] intBytes = ByteBuffer.allocate(4).putInt(a).array();
+        byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
         for (byte b: intBytes) {
             p_code[ip++] = b;
         }
     }
 
-    public static void genOpcode(String b){
-        p_code[ip++] = Byte.valueOf(b);
+    public static void genOpcode(char b){
+        p_code[ip++] = (byte)b;
     }
 
     public static void getToken() {
