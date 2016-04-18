@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public final class Parser {
-    /*
-    TODO: Generate byteArray for
-     */
-
-
     enum TYPE {
         I, R, B, C, S
     }
@@ -39,7 +34,6 @@ public final class Parser {
     private static final int ADDRESS_SIZE = 4;
 
     private static Token currentToken;
-    private static ArrayList<Token> tokenArrayList;
     private static Iterator<Token> it;
 
     private static final int INSTRUCTION_SIZE = 1000;
@@ -308,7 +302,7 @@ public final class Parser {
 
     public static TYPE F() {
         String tokenType = currentToken.getTokenType();
-        if (tokenType.equals("TK_IDENTIFIER") ||
+        if (tokenType.equals("TK_IDENTIFIER") || //TODO: more lit?
                 tokenType.equals("TK_STRLIT") ||
                 tokenType.equals("TK_INTLIT") ||
                 tokenType.equals("TK_FLOATLIT")){
@@ -356,8 +350,7 @@ public final class Parser {
 
     }
 
-    public static void setTokenArrayList(ArrayList<Token> tokenArrayList) {
-        Parser.tokenArrayList = tokenArrayList;
+    public static void setTokenArrayListIterator(ArrayList<Token> tokenArrayList) {
         it = tokenArrayList.iterator();
     }
 }

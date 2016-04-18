@@ -9,7 +9,7 @@ public final class Emulator {
         ArrayList<Token> tokenArrayList = TokenScanner.scan(new File(args[0]));
 
         System.out.println("\n Parser output:");
-        Parser.setTokenArrayList(tokenArrayList);
+        Parser.setTokenArrayListIterator(tokenArrayList);
 
         Parser.parse();
     }
