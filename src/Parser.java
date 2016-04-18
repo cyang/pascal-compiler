@@ -1,22 +1,29 @@
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 public final class Parser {
     /*
-    TODO: Generate p_code for
-        repeat
-         for
-         if
-         while
+    TODO: Generate byteArray for
      */
 
 
     enum TYPE {
-        I, R, B, C
+        I, R, B, C, S
     }
 
-    enum OP_CODES {
+    private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
+    static {
+        STRING_TYPE_HASH_MAP = new HashMap<>();
+        STRING_TYPE_HASH_MAP.put("integer", TYPE.I);
+        STRING_TYPE_HASH_MAP.put("real", TYPE.R);
+        STRING_TYPE_HASH_MAP.put("boolean", TYPE.B);
+        STRING_TYPE_HASH_MAP.put("character", TYPE.C);
+        STRING_TYPE_HASH_MAP.put("string", TYPE.S);
+    }
+
+    enum OP_CODE {
         PUSHI, PUSH, POP,
         JMP, JFALSE, JTRUE,
         CVR, CVI,
@@ -35,9 +42,9 @@ public final class Parser {
     private static ArrayList<Token> tokenArrayList;
     private static Iterator<Token> it;
 
-    private static final int INSTRUCTION_SIZE = 211;
+    private static final int INSTRUCTION_SIZE = 1000;
 
-    private static Byte[] p_code = new Byte[INSTRUCTION_SIZE];
+    private static Byte[] byteArray = new Byte[INSTRUCTION_SIZE];
     private static int ip = 0;
 
     public static void parse() {
@@ -112,7 +119,7 @@ public final class Parser {
             // Add the correct datatype for each identifier and insert into symbol table
             for (Token identifier : identifierArrayList) {
 
-                Symbol symbol = new Symbol(identifier.getTokenValue(), dataType.toLowerCase().substring(3));
+                Symbol symbol = new Symbol(identifier.getTokenValue(), STRING_TYPE_HASH_MAP.get(dataType.toLowerCase().substring(3)));
 
                 if (SymbolTable.lookup(identifier.getTokenValue()) == null) {
                     SymbolTable.insert(symbol);
@@ -186,13 +193,13 @@ public final class Parser {
         match("TK_IF");
 //        condition();
         match("TK_THEN");
-        genOpcode("OP_JFALSE");
+        genOpcode(OP_CODE.JFALSE);
         int hole1 = ip;
         genAddress(0);
         statements();
 
         if(currentToken.getTokenType().equals("TK_ELSE")) {
-            genOpcode("OP_JMP");
+            genOpcode(OP_CODE.JMP);
             int hole2 = ip;
             genAddress(0);
             int save = ip;
@@ -244,66 +251,93 @@ public final class Parser {
             }
         }
     }
-
-    public static void condition(){
-        TYPE t= E();
-        if (t != B)
-            error();
-    }
-
+//
+//    public static void condition(){
+//        TYPE t= E();
+//        if (t != B)
+//            error();
+//    }
+//
     public static void assignmentStat() {
         int lhsAddress = ip;
         Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
 
         if (symbol != null) {
-            String lhsType = "";
-
-            lhsType = symbol.getDataType();
+            TYPE lhsType = symbol.getDataType();
 
 
             getToken();
             match("TK_ASSIGNMENT");
 
-            String rhsType = E();
-            if (lhsType.equals(rhsType)) {
+            TYPE rhsType = E();
+            if (lhsType == rhsType) {
                 symbol.setValue(currentToken.getTokenValue());
             } else {
                 throw new Error(String.format("LHS type (%s) is not equal to RHS type: (%s)", lhsType, rhsType));
             }
 
-            genOpcode("OP_POP");
+            genOpcode(OP_CODE.POP);
             genAddress(lhsAddress);
         }
 
 
     }
 
-    public static String E(){
-        String t1 = T();
+    public static TYPE E(){
+        TYPE t1 = T();
         while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
             String op = currentToken.getTokenType();
             match(op);
-            String t2 = T();
+            TYPE t2 = T();
 
             t1 = emit(op, t1, t2);
+            return t1;
         }
 
+        return null;
     }
 
-    public static void emit(String op, String t1, String t2){
+    public static TYPE T() {
 
+        return null;
+    }
+
+    public static TYPE E_PRIME() {
+        return null;
+    }
+
+    public static TYPE F() {
+        String tokenType = currentToken.getTokenType();
+        if (tokenType.equals("TK_IDENTIFIER") ||
+                tokenType.equals("TK_STRLIT") ||
+                tokenType.equals("TK_INTLIT") ||
+                tokenType.equals("TK_FLOATLIT")){
+
+            Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+
+            if (symbol != null) {
+                return symbol.getDataType();
+            }
+        }
+
+        return null;
+    }
+
+    public static TYPE emit(String op, TYPE t1, TYPE t2){
+
+        return null;
     }
 
     public static void genAddress(int a){
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
         for (byte b: intBytes) {
-            p_code[ip++] = b;
+            byteArray[ip++] = b;
         }
     }
 
-    public static void genOpcode(char b){
-        p_code[ip++] = (byte)b;
+    public static void genOpcode(OP_CODE b){
+        byteArray[ip++] = (byte)(b.ordinal());
     }
 
     public static void getToken() {
