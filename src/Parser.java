@@ -319,83 +319,74 @@ public final class Parser {
     }
 
     /*
-    E -> TE'
+    Expression
+    E -> T | E + T | E - T
      */
     public static TYPE E(){
         TYPE t1 = T();
-        while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
+        while (currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
             String op = currentToken.getTokenType();
             match(op);
             TYPE t2 = T();
 
             t1 = emit(op, t1, t2);
-            return t1;
         }
 
-        return null;
+        return t1;
     }
 
     /*
-    T -> FT'
+    Term
+    T -> F | T * F | T / F
      */
     public static TYPE T() {
-        F();
-        T_PRIME();
-        return null;
-    }
+        TYPE f1 = F();
+        while (currentToken.getTokenType().equals("TK_MULTIPLY") || currentToken.getTokenType().equals("TK_DIVIDE")) {
+            String op = currentToken.getTokenType();
+            match(op);
+            TYPE f2 = F();
 
-    /*
-    E' -> +TE' | -TE' | E
-     */
-    public static TYPE E_PRIME() {
-        return null;
-    }
-
-
-    /*
-    T' -> *FT' | /FT' | epsilon
-     */
-    public static TYPE T_PRIME() {
-        switch (currentToken.getTokenType()) {
-            case "TK_MULTIPLY":
-                match("TK_MULTIPLY");
-                F();
-                break;
-            case "TK_DIVIDE":
-                match("TK_DIVIDE");
-                F();
-                break;
-            default:
-
-                break;
+            f1 = emit(op, f1, f2);
         }
 
-        return null;
+        return f1;
     }
 
+
     /*
+    Factor
     F -> id | lit | (E) | not F | +F | -F
      */
     public static TYPE F() {
         switch (currentToken.getTokenType()) {
             case "TK_IDENTIFIER":
-                break;
+                Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+                if (symbol != null) {
+                    return symbol.getDataType();
+                } else {
+                    throw new Error(String.format("Symbol not found (%s)", currentToken.getTokenValue()));
+                }
             case "TK_STRLIT":
-                break;
+                return TYPE.S;
             case "TK_INTLIT":
-                break;
+                return TYPE.I;
             case "TK_FLOATLIT":
-                break;
+                return TYPE.R;
+            case "TK_BOOLLIT":
+                return TYPE.B;
+            case "TK_CHARLIT":
+                return TYPE.C;
             case "TK_NOT":
-                break;
+                match("TK_NOT");
+                return F();
             case "TK_OPEN_PARENTHESIS":
                 match("TK_OPEN_PARENTHESIS");
                 TYPE t = E();
                 match("TK_CLOSE_PARENTHESIS");
                 return t;
+            default:
+                throw new Error("Unknown data type");
         }
-
-        return null;
     }
 
     /*
@@ -422,6 +413,22 @@ public final class Parser {
 
 
     public static TYPE emit(String op, TYPE t1, TYPE t2){
+        // TODO generate opcode for emit
+        switch (op) {
+            case "TK_PLUS":
+
+
+                break;
+            case "TK_MINUS":
+                break;
+            case "TK_MULTIPLY":
+                break;
+            case "TK_DIVIDE":
+                break;
+
+
+        }
+
 
         return null;
     }

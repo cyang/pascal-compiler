@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public final class TokenScanner {
-    // TODO Fix lineCol and lineRow
+    // TODO Fix lineCol and lineRow, Add BOOLLIT, CHARLIT
 
 
     private static String tokenName = "";
