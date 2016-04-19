@@ -177,19 +177,49 @@ public final class Parser {
     private static void forStat() {
     }
 
+    // repeat <stat> until <cond>
     private static void repeatStat() {
+        match("TK_REPEAT");
+        int target = ip;
+        statements();
+        match("TK_UNTIL");
+        condition();
+        genOpcode(OP_CODE.JFALSE);
+        genAddress(target);
     }
 
+
+    // while <cond> do <stat>
     private static void whileStat() {
+        match("TK_WHILE");
+        int target = ip;
+        condition();
+        match("TK_DO");
+
+        genOpcode(OP_CODE.JFALSE);
+        int hole = ip;
+        genAddress(0);
+
+        statements();
+        genOpcode(OP_CODE.JMP);
+        genAddress(target);
+
+        int save = ip;
+        ip = hole;
+        genAddress(save);
+        ip = save;
+
     }
 
+    // if <cond> then <stat>
+    // if <cond> then <stat> else <stat>
     public static void ifStat(){
         match("TK_IF");
-//        condition();
+        condition();
         match("TK_THEN");
         genOpcode(OP_CODE.JFALSE);
         int hole1 = ip;
-        genAddress(0);
+        genAddress(0); // Holder value for the address
         statements();
 
         if(currentToken.getTokenType().equals("TK_ELSE")) {
@@ -198,18 +228,35 @@ public final class Parser {
             genAddress(0);
             int save = ip;
             ip = hole1;
-            genAddress(save);
+            genAddress(save); // JFALSE to this else statement
             ip = save;
-            hole1 = hole2; statements(); match("TK_ELSE"); statements();
+            hole1 = hole2;
+            statements();
+            match("TK_ELSE");
+            statements();
         }
 
         int save = ip;
         ip = hole1;
-        genAddress(save);
+        genAddress(save); // JFALSE to outside the if statement in if-then or JMP past the else statement in if-else
         ip = save;
-
     }
 
+    /*
+    case E of
+        [<tags>: <statement>]^+
+            [else <statement>]
+
+    end
+
+    <tags> -> <single tag> 10:
+          <range> 3..9:
+          <list> 3,5,7:
+          <list of ranges> 1..2,30..40:
+    */
+    public static void caseStat() {
+
+    }
 
     public static void writeStat(){
         match("TK_WRITELN");
@@ -245,13 +292,7 @@ public final class Parser {
             }
         }
     }
-//
-//    public static void condition(){
-//        TYPE t= E();
-//        if (t != B)
-//            error();
-//    }
-//
+
     public static void assignmentStat() {
         int lhsAddress = ip;
         Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
@@ -277,6 +318,9 @@ public final class Parser {
 
     }
 
+    /*
+    E -> TE'
+     */
     public static TYPE E(){
         TYPE t1 = T();
         while(currentToken.getTokenType().equals("TK_PLUS") || currentToken.getTokenType().equals("TK_MINUS")) {
@@ -291,31 +335,91 @@ public final class Parser {
         return null;
     }
 
+    /*
+    T -> FT'
+     */
     public static TYPE T() {
-
+        F();
+        T_PRIME();
         return null;
     }
 
+    /*
+    E' -> +TE' | -TE' | E
+     */
     public static TYPE E_PRIME() {
         return null;
     }
 
-    public static TYPE F() {
-        String tokenType = currentToken.getTokenType();
-        if (tokenType.equals("TK_IDENTIFIER") || //TODO: more lit?
-                tokenType.equals("TK_STRLIT") ||
-                tokenType.equals("TK_INTLIT") ||
-                tokenType.equals("TK_FLOATLIT")){
 
-            Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+    /*
+    T' -> *FT' | /FT' | epsilon
+     */
+    public static TYPE T_PRIME() {
+        switch (currentToken.getTokenType()) {
+            case "TK_MULTIPLY":
+                match("TK_MULTIPLY");
+                F();
+                break;
+            case "TK_DIVIDE":
+                match("TK_DIVIDE");
+                F();
+                break;
+            default:
 
-            if (symbol != null) {
-                return symbol.getDataType();
-            }
+                break;
         }
 
         return null;
     }
+
+    /*
+    F -> id | lit | (E) | not F | +F | -F
+     */
+    public static TYPE F() {
+        switch (currentToken.getTokenType()) {
+            case "TK_IDENTIFIER":
+                break;
+            case "TK_STRLIT":
+                break;
+            case "TK_INTLIT":
+                break;
+            case "TK_FLOATLIT":
+                break;
+            case "TK_NOT":
+                break;
+            case "TK_OPEN_PARENTHESIS":
+                match("TK_OPEN_PARENTHESIS");
+                TYPE t = E();
+                match("TK_CLOSE_PARENTHESIS");
+                return t;
+        }
+
+        return null;
+    }
+
+    /*
+    C -> E | < E | > E | <= E | >= E | = E | <> E
+     */
+    public static void condition(){
+        switch (currentToken.getTokenType()) {
+            case "TK_LESS_THAN":
+                break;
+            case "TK_GREATER_THAN":
+                break;
+            case "TK_LESS_THAN_EQUAL":
+                break;
+            case "TK_GREATER_THAN_EQUAL":
+                break;
+            case "TK_EQUAL":
+                break;
+            case "TK_NOT_EQUAL":
+                break;
+            default:
+                E();
+        }
+    }
+
 
     public static TYPE emit(String op, TYPE t1, TYPE t2){
 
