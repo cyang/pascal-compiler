@@ -26,9 +26,10 @@ public final class Parser {
         ADD, SUB, MULT, DIV, NEG,
         OR, AND,
         FADD, FSUB, FMULT, FDIV, FNEG,
-        EQL, GEQ, LEQ, GTR, LSS,
+        EQL, NEQL, GEQ, LEQ, GTR, LSS,
         FGTR, FLSS,
-        HALT
+        HALT,
+        PRINT_INT, PRINT_CHAR, PRINT_BOOL, PRINT_REAL
     }
 
     private static final int ADDRESS_SIZE = 4;
@@ -183,7 +184,7 @@ public final class Parser {
         int target = ip;
         statements();
         match("TK_UNTIL");
-        condition();
+        C();
         genOpcode(OP_CODE.JFALSE);
         genAddress(target);
     }
@@ -193,7 +194,7 @@ public final class Parser {
     private static void whileStat() {
         match("TK_WHILE");
         int target = ip;
-        condition();
+        C();
         match("TK_DO");
 
         genOpcode(OP_CODE.JFALSE);
@@ -215,7 +216,7 @@ public final class Parser {
     // if <cond> then <stat> else <stat>
     public static void ifStat(){
         match("TK_IF");
-        condition();
+        C();
         match("TK_THEN");
         genOpcode(OP_CODE.JFALSE);
         int hole1 = ip;
@@ -263,22 +264,24 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
-//            TYPE t = E();
-//            switch (t) {
-//                case I:
-//                    generate print_int;
-//                    break;
-//                case C:
-//                    generate print_char;
-//                    break;
-//                case R:
-//                    generate printReal;
-//                    break;
-//                case B
-//                    generate printBool;
-//                    break;
-//
-//            }
+            TYPE t = E();
+            switch (t) {
+                case I:
+                    genOpcode(OP_CODE.PRINT_INT);
+                    break;
+                case C:
+                    genOpcode(OP_CODE.PRINT_CHAR);
+                    break;
+                case R:
+                    genOpcode(OP_CODE.PRINT_REAL);
+                    break;
+                case B:
+                    genOpcode(OP_CODE.PRINT_BOOL);
+                    break;
+
+            }
+
+
 
             switch (currentToken.getTokenType()) {
                 case "TK_COMMA":
@@ -319,8 +322,54 @@ public final class Parser {
     }
 
     /*
+    Condition
+    C -> EC'
+    C' -> < EC' | > EC' | <= EC' | >= EC' | = EC' | <> EC' | epsilon
+     */
+    public static TYPE C(){
+        TYPE e1 = E();
+        while (currentToken.getTokenType().equals("TK_LESS_THAN") ||
+                currentToken.getTokenType().equals("TK_GREATER_THAN") ||
+                currentToken.getTokenType().equals("TK_LESS_THAN_EQUAL") ||
+                currentToken.getTokenType().equals("TK_GREATER_THAN_EQUAL") ||
+                currentToken.getTokenType().equals("TK_EQUAL") ||
+                currentToken.getTokenType().equals("TK_NOT_EQUAL")) {
+            String pred = currentToken.getTokenType();
+            match(pred);
+            TYPE e2 = T();
+
+            switch (pred) {
+                case "TK_LESS_THAN":
+                    genOpcode(OP_CODE.LSS);
+                    break;
+                case "TK_GREATER_THAN":
+                    genOpcode(OP_CODE.GTR);
+                    break;
+                case "TK_LESS_THAN_EQUAL":
+                    genOpcode(OP_CODE.LEQ);
+                    break;
+                case "TK_GREATER_THAN_EQUAL":
+                    genOpcode(OP_CODE.GEQ);
+                    break;
+                case "TK_EQUAL":
+                    genOpcode(OP_CODE.EQL);
+                    break;
+                case "TK_NOT_EQUAL":
+                    genOpcode(OP_CODE.NEQL);
+                    break;
+            }
+
+            e1 = emit(pred, e1, e2);
+        }
+
+        return e1;
+    }
+
+
+    /*
     Expression
-    E -> T | E + T | E - T
+    E -> TE'
+    E' -> +TE' | -TE' | epsilon
      */
     public static TYPE E(){
         TYPE t1 = T();
@@ -328,6 +377,15 @@ public final class Parser {
             String op = currentToken.getTokenType();
             match(op);
             TYPE t2 = T();
+
+            switch (op) {
+                case "TK_PLUS":
+                    genOpcode(OP_CODE.ADD);
+                    break;
+                case "TK_MINUS":
+                    genOpcode(OP_CODE.SUB);
+                    break;
+            }
 
             t1 = emit(op, t1, t2);
         }
@@ -337,7 +395,8 @@ public final class Parser {
 
     /*
     Term
-    T -> F | T * F | T / F
+    T -> FT'
+    T' ->  *FT' | /FT' | epsilon
      */
     public static TYPE T() {
         TYPE f1 = F();
@@ -345,6 +404,15 @@ public final class Parser {
             String op = currentToken.getTokenType();
             match(op);
             TYPE f2 = F();
+
+            switch (op) {
+                case "TK_MULTIPLY":
+                    genOpcode(OP_CODE.MULT);
+                    break;
+                case "TK_DIVIDE":
+                    genOpcode(OP_CODE.DIV);
+                    break;
+            }
 
             f1 = emit(op, f1, f2);
         }
@@ -362,19 +430,34 @@ public final class Parser {
             case "TK_IDENTIFIER":
                 Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
                 if (symbol != null) {
+                    match("TK_IDENTIFIER");
                     return symbol.getDataType();
                 } else {
                     throw new Error(String.format("Symbol not found (%s)", currentToken.getTokenValue()));
                 }
-            case "TK_STRLIT":
-                return TYPE.S;
             case "TK_INTLIT":
+                genOpcode(OP_CODE.PUSHI);
+                genAddress(Integer.valueOf(currentToken.getTokenValue()));
+
+                match("TK_INTLIT");
                 return TYPE.I;
             case "TK_FLOATLIT":
+                genOpcode(OP_CODE.PUSHI);
+                genAddress(Float.valueOf(currentToken.getTokenValue()));
+
+                match("TK_FLOATLIT");
                 return TYPE.R;
             case "TK_BOOLLIT":
+                genOpcode(OP_CODE.PUSHI);
+                genAddress(Boolean.valueOf(currentToken.getTokenValue()) ? 1 : 0);
+
+                match("TK_BOOLLIT");
                 return TYPE.B;
             case "TK_CHARLIT":
+                genOpcode(OP_CODE.PUSHI);
+                genAddress(currentToken.getTokenValue().charAt(0));
+
+                match("TK_CHARLIT");
                 return TYPE.C;
             case "TK_NOT":
                 match("TK_NOT");
@@ -387,28 +470,7 @@ public final class Parser {
             default:
                 throw new Error("Unknown data type");
         }
-    }
 
-    /*
-    C -> E | < E | > E | <= E | >= E | = E | <> E
-     */
-    public static void condition(){
-        switch (currentToken.getTokenType()) {
-            case "TK_LESS_THAN":
-                break;
-            case "TK_GREATER_THAN":
-                break;
-            case "TK_LESS_THAN_EQUAL":
-                break;
-            case "TK_GREATER_THAN_EQUAL":
-                break;
-            case "TK_EQUAL":
-                break;
-            case "TK_NOT_EQUAL":
-                break;
-            default:
-                E();
-        }
     }
 
 
@@ -433,6 +495,10 @@ public final class Parser {
         return null;
     }
 
+    public static void genOpcode(OP_CODE b){
+        byteArray[ip++] = (byte)(b.ordinal());
+    }
+
     public static void genAddress(int a){
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
@@ -441,8 +507,12 @@ public final class Parser {
         }
     }
 
-    public static void genOpcode(OP_CODE b){
-        byteArray[ip++] = (byte)(b.ordinal());
+    public static void genAddress(float a){
+        byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putFloat(a).array();
+
+        for (byte b: intBytes) {
+            byteArray[ip++] = b;
+        }
     }
 
     public static void getToken() {
@@ -458,7 +528,6 @@ public final class Parser {
             System.out.println(String.format("matched: %s", currentToken.getTokenType()));
             getToken();
         }
-
     }
 
     public static void setTokenArrayListIterator(ArrayList<Token> tokenArrayList) {

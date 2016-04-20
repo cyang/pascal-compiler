@@ -54,7 +54,7 @@ public final class TokenScanner {
         OPERATORS_TOKEN.put("<", "TK_LESS_THAN");
         OPERATORS_TOKEN.put("<=", "TK_LESS_THAN_EQUAL");
         OPERATORS_TOKEN.put(">", "TK_GREATER_THAN");
-        OPERATORS_TOKEN.put(">=", "TK_GREATER_THAN");
+        OPERATORS_TOKEN.put(">=", "TK_GREATER_THAN_EQUAL");
         OPERATORS_TOKEN.put(":=", "TK_ASSIGNMENT");
         OPERATORS_TOKEN.put(",", "TK_COMMA");
         OPERATORS_TOKEN.put("=", "TK_EQUAL");
