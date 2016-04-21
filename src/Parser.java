@@ -133,6 +133,8 @@ public final class Parser {
         match("TK_BEGIN");
         statements();
         match("TK_END");
+        match("TK_DOT");
+        match("TK_EOF");
     }
 
     /*
@@ -150,28 +152,33 @@ public final class Parser {
      */
     public static void statements(){
         // TODO finish statements
-        switch (currentToken.getTokenType()){
-            case "TK_WHILE":
-                whileStat();
-                break;
-            case "TK_REPEAT":
-                repeatStat();
-                break;
-            case "TK_IF":
-                ifStat();
-                break;
-            case "TK_FOR":
-                forStat();
-                break;
-            case "TK_WRITELN":
-                writeStat();
-                break;
-            case "TK_IDENTIFIER":
-                assignmentStat();
-            default:
-                break;
+        while(!currentToken.getTokenType().equals("TK_END")) {
+            switch (currentToken.getTokenType()) {
+                case "TK_WHILE":
+                    whileStat();
+                    break;
+                case "TK_REPEAT":
+                    repeatStat();
+                    break;
+                case "TK_IF":
+                    ifStat();
+                    break;
+                case "TK_FOR":
+                    forStat();
+                    break;
+                case "TK_WRITELN":
+                    writeStat();
+                    break;
+                case "TK_IDENTIFIER":
+                    assignmentStat();
+                    break;
+                case "TK_SEMI_COLON":
+                    match("TK_SEMI_COLON");
+                    break;
+                default:
+                    break;
+            }
         }
-
 
     }
 
@@ -400,7 +407,9 @@ public final class Parser {
      */
     public static TYPE T() {
         TYPE f1 = F();
-        while (currentToken.getTokenType().equals("TK_MULTIPLY") || currentToken.getTokenType().equals("TK_DIVIDE")) {
+        while (currentToken.getTokenType().equals("TK_MULTIPLY") ||
+                currentToken.getTokenType().equals("TK_DIVIDE") ||
+                currentToken.getTokenType().equals("TK_DIV")) {
             String op = currentToken.getTokenType();
             match(op);
             TYPE f2 = F();
@@ -416,7 +425,6 @@ public final class Parser {
 
             f1 = emit(op, f1, f2);
         }
-
         return f1;
     }
 
@@ -459,6 +467,14 @@ public final class Parser {
 
                 match("TK_CHARLIT");
                 return TYPE.C;
+            case "TK_STRLIT":
+                for (char c: currentToken.getTokenType().toCharArray()) {
+                    genOpcode(OP_CODE.PUSHI);
+                    genAddress(c);
+                }
+
+                match("TK_STRLIT");
+                return TYPE.S;
             case "TK_NOT":
                 match("TK_NOT");
                 return F();
@@ -478,19 +494,67 @@ public final class Parser {
         // TODO generate opcode for emit
         switch (op) {
             case "TK_PLUS":
-
-
-                break;
+                if (t1 == TYPE.I && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.ADD);
+                    return TYPE.I;
+                } else if (t1 == TYPE.I && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.XCHG);
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FADD);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FADD);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.FADD);
+                    return TYPE.R;
+                }
             case "TK_MINUS":
-                break;
+                if (t1 == TYPE.I && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.SUB);
+                    return TYPE.I;
+                } else if (t1 == TYPE.I && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.XCHG);
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FSUB);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FSUB);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.FSUB);
+                    return TYPE.R;
+                }
             case "TK_MULTIPLY":
-                break;
+                if (t1 == TYPE.I && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.MULT);
+                    return TYPE.I;
+                } else if (t1 == TYPE.I && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.XCHG);
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FMULT);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.CVR);
+                    genOpcode(OP_CODE.FMULT);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.R) {
+                    genOpcode(OP_CODE.FMULT);
+                    return TYPE.R;
+                }
             case "TK_DIVIDE":
-                break;
-
-
+                if ((t1 == TYPE.R || t1 == TYPE.I) && (t2 == TYPE.R || t2 == TYPE.I)) {
+                    genOpcode(OP_CODE.FDIV);
+                    return TYPE.R;
+                }
+            case "TK_DIV":
+                if (t1 == TYPE.I && t2 == TYPE.I) {
+                    genOpcode(OP_CODE.DIV);
+                    return TYPE.I;
+                }
         }
-
 
         return null;
     }
