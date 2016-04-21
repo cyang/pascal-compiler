@@ -151,7 +151,6 @@ public final class Parser {
 	    <writeStat>
      */
     public static void statements(){
-        // TODO finish statements
         while(!currentToken.getTokenType().equals("TK_END")) {
             switch (currentToken.getTokenType()) {
                 case "TK_WHILE":
@@ -176,7 +175,7 @@ public final class Parser {
                     match("TK_SEMI_COLON");
                     break;
                 default:
-                    break;
+                    return;
             }
         }
 
@@ -229,7 +228,7 @@ public final class Parser {
         int hole1 = ip;
         genAddress(0); // Holder value for the address
         statements();
-
+        
         if(currentToken.getTokenType().equals("TK_ELSE")) {
             genOpcode(OP_CODE.JMP);
             int hole2 = ip;
@@ -292,10 +291,10 @@ public final class Parser {
 
             switch (currentToken.getTokenType()) {
                 case "TK_COMMA":
-                    getToken();
+                    match("TK_CLOSE_PARENTHESIS");
                     break;
                 case "TK_CLOSE_PARENTHESIS":
-                    getToken();
+                    match("TK_CLOSE_PARENTHESIS");
                     return;
                 default:
                     throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
@@ -452,7 +451,6 @@ public final class Parser {
 
 
     public static TYPE emit(String op, TYPE t1, TYPE t2){
-        // TODO generate opcode for emit
         switch (op) {
             case "TK_PLUS":
                 if (t1 == TYPE.I && t2 == TYPE.I) {

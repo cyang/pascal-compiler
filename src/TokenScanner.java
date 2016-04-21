@@ -152,6 +152,8 @@ public final class TokenScanner {
                         // Continue reading line
                         lineCol++;
                     }
+                } else {
+                    handleNumber(element);
                 }
                 break;
             case OPERATOR:
@@ -167,15 +169,7 @@ public final class TokenScanner {
                         isFloat = true;
                         tokenName += element;
                     } else {
-                        readingNumber = false;
-                        if (isFloat) {
-                            System.out.println("TK_FLOATLIT: " + tokenName);
-                            generateToken("TK_FLOATLIT");
-                            isFloat = false;
-                        } else {
-                            System.out.println("TK_INTLIT: " + tokenName);
-                            generateToken("TK_INTLIT");
-                        }
+                        handleNumber(element);
 
                         System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
                         generateToken(OPERATORS_TOKEN.get(String.valueOf(element)));
@@ -256,5 +250,18 @@ public final class TokenScanner {
         Token t = new Token(tokenType, tokenName, lineCol, lineRow);
         tokenArrayList.add(t);
         tokenName = "";
+
+    }
+
+    public static void handleNumber(char element) {
+        readingNumber = false;
+        if (isFloat) {
+            System.out.println("TK_FLOATLIT: " + tokenName);
+            generateToken("TK_FLOATLIT");
+            isFloat = false;
+        } else {
+            System.out.println("TK_INTLIT: " + tokenName);
+            generateToken("TK_INTLIT");
+        }
     }
 }
