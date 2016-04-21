@@ -228,7 +228,7 @@ public final class Parser {
         int hole1 = ip;
         genAddress(0); // Holder value for the address
         statements();
-        
+
         if(currentToken.getTokenType().equals("TK_ELSE")) {
             genOpcode(OP_CODE.JMP);
             int hole2 = ip;
@@ -291,7 +291,7 @@ public final class Parser {
 
             switch (currentToken.getTokenType()) {
                 case "TK_COMMA":
-                    match("TK_CLOSE_PARENTHESIS");
+                    match("TK_COMMA");
                     break;
                 case "TK_CLOSE_PARENTHESIS":
                     match("TK_CLOSE_PARENTHESIS");
