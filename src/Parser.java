@@ -345,27 +345,6 @@ public final class Parser {
             match(pred);
             TYPE e2 = T();
 
-            switch (pred) {
-                case "TK_LESS_THAN":
-                    genOpcode(OP_CODE.LSS);
-                    break;
-                case "TK_GREATER_THAN":
-                    genOpcode(OP_CODE.GTR);
-                    break;
-                case "TK_LESS_THAN_EQUAL":
-                    genOpcode(OP_CODE.LEQ);
-                    break;
-                case "TK_GREATER_THAN_EQUAL":
-                    genOpcode(OP_CODE.GEQ);
-                    break;
-                case "TK_EQUAL":
-                    genOpcode(OP_CODE.EQL);
-                    break;
-                case "TK_NOT_EQUAL":
-                    genOpcode(OP_CODE.NEQL);
-                    break;
-            }
-
             e1 = emit(pred, e1, e2);
         }
 
@@ -384,15 +363,6 @@ public final class Parser {
             String op = currentToken.getTokenType();
             match(op);
             TYPE t2 = T();
-
-            switch (op) {
-                case "TK_PLUS":
-                    genOpcode(OP_CODE.ADD);
-                    break;
-                case "TK_MINUS":
-                    genOpcode(OP_CODE.SUB);
-                    break;
-            }
 
             t1 = emit(op, t1, t2);
         }
@@ -413,15 +383,6 @@ public final class Parser {
             String op = currentToken.getTokenType();
             match(op);
             TYPE f2 = F();
-
-            switch (op) {
-                case "TK_MULTIPLY":
-                    genOpcode(OP_CODE.MULT);
-                    break;
-                case "TK_DIVIDE":
-                    genOpcode(OP_CODE.DIV);
-                    break;
-            }
 
             f1 = emit(op, f1, f2);
         }
@@ -554,6 +515,36 @@ public final class Parser {
                     genOpcode(OP_CODE.DIV);
                     return TYPE.I;
                 }
+            case "TK_LESS_THAN":
+                return emitBool(OP_CODE.LSS, t1, t2);
+            case "TK_GREATER_THAN":
+                return emitBool(OP_CODE.GTR, t1, t2);
+            case "TK_LESS_THAN_EQUAL":
+                return emitBool(OP_CODE.LEQ, t1, t2);
+            case "TK_GREATER_THAN_EQUAL":
+                return emitBool(OP_CODE.GEQ, t1, t2);
+            case "TK_EQUAL":
+                return emitBool(OP_CODE.EQL, t1, t2);
+            case "TK_NOT_EQUAL":
+                return emitBool(OP_CODE.NEQL, t1, t2);
+        }
+
+        return null;
+    }
+
+    public static TYPE emitBool(OP_CODE pred, TYPE t1, TYPE t2) {
+        if (t1 == t2) {
+            genOpcode(pred);
+            return TYPE.B;
+        } else if (t1 == TYPE.I && t2 == TYPE.R) {
+            genOpcode(OP_CODE.XCHG);
+            genOpcode(OP_CODE.CVR);
+            genOpcode(pred);
+            return TYPE.B;
+        } else if (t1 == TYPE.R && t2 == TYPE.I) {
+            genOpcode(OP_CODE.CVR);
+            genOpcode(pred);
+            return TYPE.B;
         }
 
         return null;
