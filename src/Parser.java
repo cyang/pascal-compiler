@@ -39,10 +39,10 @@ public final class Parser {
 
     private static final int INSTRUCTION_SIZE = 1000;
 
-    private static Byte[] byteArray = new Byte[INSTRUCTION_SIZE];
+    private static byte[] byteArray = new byte[INSTRUCTION_SIZE];
     private static int ip = 0;
 
-    public static void parse() {
+    public static byte[] parse() {
         getToken(); // Get initial token
 
         match("TK_PROGRAM");
@@ -50,6 +50,8 @@ public final class Parser {
         match("TK_SEMI_COLON");
 
         program();
+
+        return byteArray;
     }
 
     /*

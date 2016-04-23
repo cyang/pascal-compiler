@@ -11,6 +11,11 @@ public final class Emulator {
         System.out.println("\n Parser output:");
         Parser.setTokenArrayListIterator(tokenArrayList);
 
-        Parser.parse();
+        byte[] instructions = Parser.parse();
+        Simulator.setInstructions(instructions);
+
+        Simulator.simulate();
+
+
     }
 }
