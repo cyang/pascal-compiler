@@ -25,13 +25,25 @@ public class Simulator {
                     break;
                 case CVR:
                     break;
+                case JMP:
+                    getAddressValue();
+                    break;
                 case FMULT:
                     break;
                 case PRINT_REAL:
+//                    System.out.println();
                     break;
                 case HALT:
                     halt();
                     break;
+                case LSS:
+                    break;
+                case JFALSE:
+                    break;
+                case ADD:
+                    break;
+                default:
+                    throw new Error(String.format("Unhandled case: %s", opCode));
             }
 
         }
@@ -111,9 +123,6 @@ public class Simulator {
         for (int i = 0; i < 4; i++) {
             valArray[i] = instructions[ip++];
         }
-
-
-
 
         return ByteBuffer.wrap(valArray).getInt();
     }

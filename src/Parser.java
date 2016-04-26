@@ -210,7 +210,12 @@ public final class Parser {
         int hole = ip;
         genAddress(0);
 
+        match("TK_BEGIN");
         statements();
+        match("TK_END");
+        match("TK_SEMI_COLON");
+
+
         genOpCode(OP_CODE.JMP);
         genAddress(target);
 
@@ -557,14 +562,18 @@ public final class Parser {
     }
 
     public static void genAddress(int a){
+        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
         for (byte b: intBytes) {
             byteArray[ip++] = b;
         }
+
+
     }
 
     public static void genAddress(float a){
+        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putFloat(a).array();
 
         for (byte b: intBytes) {

@@ -96,7 +96,7 @@ public final class TokenScanner {
         Scanner sc = new Scanner(file).useDelimiter("");
 
         while (sc.hasNext()) {
-            char element = sc.next().charAt(0);
+            char element = sc.next().toLowerCase().charAt(0);
 
             checkCharacter(element);
         }
