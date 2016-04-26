@@ -1,0 +1,4 @@
+program halt;
+
+begin
+end.

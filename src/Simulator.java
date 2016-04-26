@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 import java.util.Stack;
 
 public class Simulator {
@@ -5,12 +6,36 @@ public class Simulator {
     private static int ip = 0;
     private static Stack<Object> stack = new Stack<>();
 
-    private static byte[] instructions;
+    private static Byte[] instructions;
 
 
     public static void simulate() {
+        Parser.OP_CODE opCode;
+        Object popValue;
 
+        do {
+            opCode = getOpCode();
+            System.out.println(opCode);
+            switch (opCode) {
+                case PUSHI:
+                    pushi();
+                    break;
+                case POP:
+                    popValue = pop();
+                    break;
+                case CVR:
+                    break;
+                case FMULT:
+                    break;
+                case PRINT_REAL:
+                    break;
+                case HALT:
+                    halt();
+                    break;
+            }
 
+        }
+        while (opCode != Parser.OP_CODE.HALT);
     }
 
     public static void writeln(){
@@ -55,15 +80,20 @@ public class Simulator {
     }
 
     public static void pushi(){
-        
+        int val = getAddressValue();
+//        System.out.println(val);
+        stack.push(val);
     }
 
     public static void push(Object val){
         stack.push(val);
     }
 
-    public static void pop(){
-        stack.pop();
+    public static Object pop(){
+        // TODO: Assign pop to symbolTable
+        getAddressValue();
+
+        return stack.pop();
     }
 
     public static void jmp(){
@@ -72,20 +102,27 @@ public class Simulator {
 
 
     public static void halt() {
-        System.out.println("Program finished running");
+        System.out.println("\n Program finished running");
         System.exit(0);
     }
 
     public static int getAddressValue() {
-        String binaryNumber = "";
+        byte[] valArray = new byte[4];
         for (int i = 0; i < 4; i++) {
-            binaryNumber += instructions[ip+i];
+            valArray[i] = instructions[ip++];
         }
 
-        return Integer.parseInt(binaryNumber);
+
+
+
+        return ByteBuffer.wrap(valArray).getInt();
     }
 
-    public static void setInstructions(byte[] instructions) {
+    public static Parser.OP_CODE getOpCode(){
+        return Parser.OP_CODE.values()[instructions[ip++]];
+    }
+
+    public static void setInstructions(Byte[] instructions) {
         Simulator.instructions = instructions;
     }
 }

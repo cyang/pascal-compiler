@@ -39,10 +39,10 @@ public final class Parser {
 
     private static final int INSTRUCTION_SIZE = 1000;
 
-    private static byte[] byteArray = new byte[INSTRUCTION_SIZE];
+    private static Byte[] byteArray = new Byte[INSTRUCTION_SIZE];
     private static int ip = 0;
 
-    public static byte[] parse() {
+    public static Byte[] parse() {
         getToken(); // Get initial token
 
         match("TK_PROGRAM");
@@ -137,6 +137,7 @@ public final class Parser {
         match("TK_END");
         match("TK_DOT");
         match("TK_EOF");
+        genOpCode(OP_CODE.HALT);
     }
 
     /*
@@ -193,7 +194,7 @@ public final class Parser {
         statements();
         match("TK_UNTIL");
         C();
-        genOpcode(OP_CODE.JFALSE);
+        genOpCode(OP_CODE.JFALSE);
         genAddress(target);
     }
 
@@ -205,12 +206,12 @@ public final class Parser {
         C();
         match("TK_DO");
 
-        genOpcode(OP_CODE.JFALSE);
+        genOpCode(OP_CODE.JFALSE);
         int hole = ip;
         genAddress(0);
 
         statements();
-        genOpcode(OP_CODE.JMP);
+        genOpCode(OP_CODE.JMP);
         genAddress(target);
 
         int save = ip;
@@ -226,13 +227,13 @@ public final class Parser {
         match("TK_IF");
         C();
         match("TK_THEN");
-        genOpcode(OP_CODE.JFALSE);
+        genOpCode(OP_CODE.JFALSE);
         int hole1 = ip;
         genAddress(0); // Holder value for the address
         statements();
 
         if(currentToken.getTokenType().equals("TK_ELSE")) {
-            genOpcode(OP_CODE.JMP);
+            genOpCode(OP_CODE.JMP);
             int hole2 = ip;
             genAddress(0);
             int save = ip;
@@ -275,16 +276,16 @@ public final class Parser {
             TYPE t = E();
             switch (t) {
                 case I:
-                    genOpcode(OP_CODE.PRINT_INT);
+                    genOpCode(OP_CODE.PRINT_INT);
                     break;
                 case C:
-                    genOpcode(OP_CODE.PRINT_CHAR);
+                    genOpCode(OP_CODE.PRINT_CHAR);
                     break;
                 case R:
-                    genOpcode(OP_CODE.PRINT_REAL);
+                    genOpCode(OP_CODE.PRINT_REAL);
                     break;
                 case B:
-                    genOpcode(OP_CODE.PRINT_BOOL);
+                    genOpCode(OP_CODE.PRINT_BOOL);
                     break;
 
             }
@@ -322,7 +323,7 @@ public final class Parser {
                 throw new Error(String.format("LHS type (%s) is not equal to RHS type: (%s)", lhsType, rhsType));
             }
 
-            genOpcode(OP_CODE.POP);
+            genOpCode(OP_CODE.POP);
             genAddress(lhsAddress);
         }
 
@@ -406,32 +407,32 @@ public final class Parser {
                     throw new Error(String.format("Symbol not found (%s)", currentToken.getTokenValue()));
                 }
             case "TK_INTLIT":
-                genOpcode(OP_CODE.PUSHI);
+                genOpCode(OP_CODE.PUSHI);
                 genAddress(Integer.valueOf(currentToken.getTokenValue()));
 
                 match("TK_INTLIT");
                 return TYPE.I;
             case "TK_FLOATLIT":
-                genOpcode(OP_CODE.PUSHI);
+                genOpCode(OP_CODE.PUSHI);
                 genAddress(Float.valueOf(currentToken.getTokenValue()));
 
                 match("TK_FLOATLIT");
                 return TYPE.R;
             case "TK_BOOLLIT":
-                genOpcode(OP_CODE.PUSHI);
+                genOpCode(OP_CODE.PUSHI);
                 genAddress(Boolean.valueOf(currentToken.getTokenValue()) ? 1 : 0);
 
                 match("TK_BOOLLIT");
                 return TYPE.B;
             case "TK_CHARLIT":
-                genOpcode(OP_CODE.PUSHI);
+                genOpCode(OP_CODE.PUSHI);
                 genAddress(currentToken.getTokenValue().charAt(0));
 
                 match("TK_CHARLIT");
                 return TYPE.C;
             case "TK_STRLIT":
                 for (char c: currentToken.getTokenType().toCharArray()) {
-                    genOpcode(OP_CODE.PUSHI);
+                    genOpCode(OP_CODE.PUSHI);
                     genAddress(c);
                 }
 
@@ -456,63 +457,63 @@ public final class Parser {
         switch (op) {
             case "TK_PLUS":
                 if (t1 == TYPE.I && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.ADD);
+                    genOpCode(OP_CODE.ADD);
                     return TYPE.I;
                 } else if (t1 == TYPE.I && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.XCHG);
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FADD);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FADD);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FADD);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FADD);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.FADD);
+                    genOpCode(OP_CODE.FADD);
                     return TYPE.R;
                 }
             case "TK_MINUS":
                 if (t1 == TYPE.I && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.SUB);
+                    genOpCode(OP_CODE.SUB);
                     return TYPE.I;
                 } else if (t1 == TYPE.I && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.XCHG);
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FSUB);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FSUB);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FSUB);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FSUB);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.FSUB);
+                    genOpCode(OP_CODE.FSUB);
                     return TYPE.R;
                 }
             case "TK_MULTIPLY":
                 if (t1 == TYPE.I && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.MULT);
+                    genOpCode(OP_CODE.MULT);
                     return TYPE.I;
                 } else if (t1 == TYPE.I && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.XCHG);
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FMULT);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FMULT);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.CVR);
-                    genOpcode(OP_CODE.FMULT);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FMULT);
                     return TYPE.R;
                 } else if (t1 == TYPE.R && t2 == TYPE.R) {
-                    genOpcode(OP_CODE.FMULT);
+                    genOpCode(OP_CODE.FMULT);
                     return TYPE.R;
                 }
             case "TK_DIVIDE":
                 if ((t1 == TYPE.R || t1 == TYPE.I) && (t2 == TYPE.R || t2 == TYPE.I)) {
-                    genOpcode(OP_CODE.FDIV);
+                    genOpCode(OP_CODE.FDIV);
                     return TYPE.R;
                 }
             case "TK_DIV":
                 if (t1 == TYPE.I && t2 == TYPE.I) {
-                    genOpcode(OP_CODE.DIV);
+                    genOpCode(OP_CODE.DIV);
                     return TYPE.I;
                 }
             case "TK_LESS_THAN":
@@ -534,23 +535,24 @@ public final class Parser {
 
     public static TYPE emitBool(OP_CODE pred, TYPE t1, TYPE t2) {
         if (t1 == t2) {
-            genOpcode(pred);
+            genOpCode(pred);
             return TYPE.B;
         } else if (t1 == TYPE.I && t2 == TYPE.R) {
-            genOpcode(OP_CODE.XCHG);
-            genOpcode(OP_CODE.CVR);
-            genOpcode(pred);
+            genOpCode(OP_CODE.XCHG);
+            genOpCode(OP_CODE.CVR);
+            genOpCode(pred);
             return TYPE.B;
         } else if (t1 == TYPE.R && t2 == TYPE.I) {
-            genOpcode(OP_CODE.CVR);
-            genOpcode(pred);
+            genOpCode(OP_CODE.CVR);
+            genOpCode(pred);
             return TYPE.B;
         }
 
         return null;
     }
 
-    public static void genOpcode(OP_CODE b){
+    public static void genOpCode(OP_CODE b){
+        System.out.println(String.format("OP_CODE: %s", b));
         byteArray[ip++] = (byte)(b.ordinal());
     }
 
@@ -580,7 +582,7 @@ public final class Parser {
         if (!tokenType.equals(currentToken.getTokenType())) {
             throw new Error(String.format("Token type (%s) does not match current token type (%s)", tokenType, currentToken.getTokenType()));
         } else {
-            System.out.println(String.format("matched: %s", currentToken.getTokenType()));
+//            System.out.println(String.format("matched: %s", currentToken.getTokenType()));
             getToken();
         }
     }

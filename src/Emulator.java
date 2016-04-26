@@ -5,15 +5,16 @@ import java.util.ArrayList;
 public final class Emulator {
 
     public static void main(String[] args) throws FileNotFoundException {
-        System.out.println("Scanner output:");
+        System.out.println(" Scanner output:");
         ArrayList<Token> tokenArrayList = TokenScanner.scan(new File(args[0]));
 
         System.out.println("\n Parser output:");
         Parser.setTokenArrayListIterator(tokenArrayList);
 
-        byte[] instructions = Parser.parse();
+        Byte[] instructions = Parser.parse();
         Simulator.setInstructions(instructions);
 
+        System.out.println("\n Starting simulator:");
         Simulator.simulate();
 
 
