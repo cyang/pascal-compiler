@@ -1,17 +1,20 @@
+import sun.jvm.hotspot.debugger.cdbg.Sym;
+
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Stack;
 
 public class Simulator {
 
     private static int ip = 0;
+    private static Object val = 0;
+
     private static Stack<Object> stack = new Stack<>();
 
     private static Byte[] instructions;
 
-
     public static void simulate() {
         Parser.OP_CODE opCode;
-        Object popValue;
 
         do {
             opCode = getOpCode();
@@ -21,7 +24,7 @@ public class Simulator {
                     pushi();
                     break;
                 case POP:
-                    popValue = pop();
+                    pop();
                     break;
                 case CVR:
                     break;
@@ -33,6 +36,8 @@ public class Simulator {
                 case PRINT_REAL:
 //                    System.out.println();
                     break;
+                case PRINT_INT:
+                    break;
                 case HALT:
                     halt();
                     break;
@@ -41,6 +46,10 @@ public class Simulator {
                 case JFALSE:
                     break;
                 case ADD:
+                    break;
+                case SUB:
+                    break;
+                case MULT:
                     break;
                 default:
                     throw new Error(String.format("Unhandled case: %s", opCode));
@@ -104,7 +113,6 @@ public class Simulator {
     public static Object pop(){
         // TODO: Assign pop to symbolTable
         getAddressValue();
-
         return stack.pop();
     }
 

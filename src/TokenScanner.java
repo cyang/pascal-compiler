@@ -16,6 +16,7 @@ public final class TokenScanner {
     private static boolean isFloat = false;
     private static boolean sciNotation = false;
     private static boolean readingColon = false;
+    private static boolean readingBool = false;
 
     private static ArrayList<Token> tokenArrayList = new ArrayList<>();
 
@@ -109,6 +110,8 @@ public final class TokenScanner {
 
     public static void checkCharacter(char element){
         switch (CHAR_TYPE.get(String.valueOf(element))){
+        // TODO finish falsifying readingBool
+
             case LETTER:
                 if (!readingNumber) {
                     tokenName += element;
@@ -139,6 +142,12 @@ public final class TokenScanner {
                     generateToken(OPERATORS_TOKEN.get(tokenName));
 
                     readingColon = false;
+
+                } else if (readingBool) {
+                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+                    generateToken(OPERATORS_TOKEN.get(tokenName));
+
+                    readingBool = false;
 
                 } else if (!readingNumber) {
                     // End of word
@@ -183,6 +192,18 @@ public final class TokenScanner {
 
 
                     readingColon = false;
+                } else if (readingBool) {
+                    if (tokenName.equals("<") && ((element == '=') || (element == '>'))) {
+                        tokenName += element;
+                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+                        generateToken(OPERATORS_TOKEN.get(tokenName));
+                    } else if (tokenName.equals(">") && (element == '=')) {
+                        tokenName += element;
+                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+                        generateToken(OPERATORS_TOKEN.get(tokenName));
+                    }
+
+                    readingBool = false;
                 } else {
                     if (element == ';') {
                         // Before end of line
@@ -194,6 +215,10 @@ public final class TokenScanner {
                     } else if (element == ':') {
                         tokenName = endOfWord();
                         readingColon = true;
+                        tokenName += element;
+                    } else if (element == '<' || element == '>'){
+                        tokenName = endOfWord();
+                        readingBool = true;
                         tokenName += element;
                     } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
                         tokenName = endOfWord();
@@ -244,13 +269,14 @@ public final class TokenScanner {
         readingNumber = false;
         isFloat = false;
         sciNotation = false;
+        readingColon = false;
+        readingBool = false;
     }
 
     public static void generateToken(String tokenType) {
         Token t = new Token(tokenType, tokenName, lineCol, lineRow);
         tokenArrayList.add(t);
         tokenName = "";
-
     }
 
     public static void handleNumber(char element) {

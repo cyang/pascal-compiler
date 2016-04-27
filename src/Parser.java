@@ -323,13 +323,11 @@ public final class Parser {
 
             TYPE rhsType = E();
             if (lhsType == rhsType) {
-                symbol.setValue(currentToken.getTokenValue());
+                genOpCode(OP_CODE.POP);
+                genAddress(lhsAddress);
             } else {
                 throw new Error(String.format("LHS type (%s) is not equal to RHS type: (%s)", lhsType, rhsType));
             }
-
-            genOpCode(OP_CODE.POP);
-            genAddress(lhsAddress);
         }
 
 
