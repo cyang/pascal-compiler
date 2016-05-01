@@ -237,10 +237,14 @@ public final class TokenScanner {
 
                 if (!readingString) {
                     // Found end quote
-                    System.out.println("TK_STRLIT: " + tokenName );
-                    generateToken("TK_STRLIT");
+                    if (tokenName.length() > 1) {
+                        System.out.println("TK_STRLIT: " + tokenName);
+                        generateToken("TK_STRLIT");
+                    } else if (tokenName.length() == 1) {
+                        System.out.println("TK_CHARLIT: " + tokenName);
+                        generateToken("TK_CHARLIT");
+                    }
                 }
-
                 lineCol++;
                 break;
             default:

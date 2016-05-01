@@ -1,7 +1,4 @@
-import sun.jvm.hotspot.debugger.cdbg.Sym;
-
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Stack;
 
 public class Simulator {
@@ -27,16 +24,22 @@ public class Simulator {
                     pop();
                     break;
                 case CVR:
+                    cvr();
                     break;
                 case JMP:
                     getAddressValue();
                     break;
-                case FMULT:
-                    break;
                 case PRINT_REAL:
-//                    System.out.println();
+                    writeln();
                     break;
                 case PRINT_INT:
+                    writeln();
+                    break;
+                case PRINT_BOOL:
+                    writeln();
+                    break;
+                case PRINT_CHAR:
+                    writeln();
                     break;
                 case HALT:
                     halt();
@@ -46,10 +49,28 @@ public class Simulator {
                 case JFALSE:
                     break;
                 case ADD:
+                    add();
+                    break;
+                case FADD:
+                    fadd();
                     break;
                 case SUB:
+                    sub();
+                    break;
+                case FSUB:
+                    fsub();
                     break;
                 case MULT:
+                    mult();
+                    break;
+                case FMULT:
+                    fmult();
+                    break;
+                case DIV:
+                    div();
+                    break;
+                case FDIV:
+                    fdiv();
                     break;
                 default:
                     throw new Error(String.format("Unhandled case: %s", opCode));
@@ -65,37 +86,62 @@ public class Simulator {
     }
 
     public static void add(){
-        Integer val1 = (Integer) stack.pop();
-        Integer val2 = (Integer) stack.pop();
+        int val1 = (int) stack.pop();
+        int val2 = (int) stack.pop();
         stack.push(val1 + val2);
     }
 
+    private static void fadd() {
+        float val1 = (float) stack.pop();
+        float val2 = (float) stack.pop();
+        stack.push(val1 + val2);
+    }
+
+
     public static void sub(){
-        Integer val1 = (Integer) stack.pop();
-        Integer val2 = (Integer) stack.pop();
+        int val1 = (int) stack.pop();
+        int val2 = (int) stack.pop();
         stack.push(val1 - val2);
     }
 
-    public static void div(){
-        Integer val1 = (Integer) stack.pop();
-        Integer val2 = (Integer) stack.pop();
-        stack.push(val1 / val2);
+    public static void fsub(){
+        float val1 = (float) stack.pop();
+        float val2 = (float) stack.pop();
+        stack.push(val1 - val2);
     }
 
     public static void mult(){
-        Integer val1 = (Integer) stack.pop();
-        Integer val2 = (Integer) stack.pop();
+        int val1 = (int) stack.pop();
+        int val2 = (int) stack.pop();
         stack.push(val1 * val2);
     }
 
+    public static void fmult(){
+        float val1 = (float) stack.pop();
+        float val2 = (float) stack.pop();
+        stack.push(val1 * val2);
+    }
+
+    public static void fdiv(){
+        float val1 = (float) stack.pop();
+        float val2 = (float) stack.pop();
+        stack.push(val1 / val2);
+    }
+
+    public static void div(){
+        int val1 = (int) stack.pop();
+        int val2 = (int) stack.pop();
+        stack.push(val1 / val2);
+    }
+
     public static void cvr(){
-        Integer val = (Integer) stack.pop();
-        stack.push((float) val);
+        float val = (float) stack.pop();
+        stack.push(val);
     }
 
     public static void xchg(){
-        Integer val1 = (Integer) stack.pop();
-        Integer val2 = (Integer) stack.pop();
+        Integer val1 = (int) stack.pop();
+        Integer val2 = (int) stack.pop();
         stack.push(val1);
         stack.push(val2);
     }
