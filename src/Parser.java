@@ -8,6 +8,9 @@ public final class Parser {
         I, R, B, C, S
     }
 
+    private static HashMap<Integer, Integer> dataMap = new HashMap<>();
+    private static int dataAddress = 0;
+
     private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
     static {
         STRING_TYPE_HASH_MAP = new HashMap<>();
@@ -116,7 +119,14 @@ public final class Parser {
             // Add the correct datatype for each identifier and insert into symbol table
             for (Token identifier : identifierArrayList) {
 
-                Symbol symbol = new Symbol(identifier.getTokenValue(), STRING_TYPE_HASH_MAP.get(dataType.toLowerCase().substring(3)));
+                dataMap.put(dataAddress, null);
+
+                Symbol symbol = new Symbol(identifier.getTokenValue(),
+                        STRING_TYPE_HASH_MAP.get(dataType.toLowerCase().substring(3)),
+                        dataAddress);
+
+                dataAddress += 4;
+
 
                 if (SymbolTable.lookup(identifier.getTokenValue()) == null) {
                     SymbolTable.insert(symbol);
@@ -278,47 +288,56 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
-            TYPE t = E();
-            switch (t) {
-                case I:
-                    genOpCode(OP_CODE.PRINT_INT);
-                    break;
-                case C:
-                    genOpCode(OP_CODE.PRINT_CHAR);
-                    break;
-                case R:
-                    genOpCode(OP_CODE.PRINT_REAL);
-                    break;
-                case B:
-                    genOpCode(OP_CODE.PRINT_BOOL);
-                    break;
+            Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
+            if (symbol != null) {
 
-            }
+                int address = symbol.getAddress();
+
+                TYPE t = E();
+                switch (t) {
+                    case I:
+                        genOpCode(OP_CODE.PRINT_INT);
+                        genAddress(address);
+                        break;
+                    case C:
+                        genOpCode(OP_CODE.PRINT_CHAR);
+                        genAddress(address);
+                        break;
+                    case R:
+                        genOpCode(OP_CODE.PRINT_REAL);
+                        genAddress(address);
+                        break;
+                    case B:
+                        genOpCode(OP_CODE.PRINT_BOOL);
+                        genAddress(address);
+                        break;
+
+                }
 
 
-
-            switch (currentToken.getTokenType()) {
-                case "TK_COMMA":
-                    match("TK_COMMA");
-                    break;
-                case "TK_CLOSE_PARENTHESIS":
-                    match("TK_CLOSE_PARENTHESIS");
-                    return;
-                default:
-                    throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
+                switch (currentToken.getTokenType()) {
+                    case "TK_COMMA":
+                        match("TK_COMMA");
+                        break;
+                    case "TK_CLOSE_PARENTHESIS":
+                        match("TK_CLOSE_PARENTHESIS");
+                        return;
+                    default:
+                        throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
+                }
             }
         }
     }
 
     public static void assignmentStat() {
-        int lhsAddress = ip;
         Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
 
         if (symbol != null) {
             TYPE lhsType = symbol.getDataType();
+            int lhsAddress = symbol.getAddress();
 
 
-            getToken();
+            match("TK_IDENTIFIER");
             match("TK_ASSIGNMENT");
 
             TYPE rhsType = E();
@@ -596,5 +615,9 @@ public final class Parser {
 
     public static void setTokenArrayListIterator(ArrayList<Token> tokenArrayList) {
         it = tokenArrayList.iterator();
+    }
+
+    public static HashMap<Integer, Integer> getDataMap() {
+        return dataMap;
     }
 }

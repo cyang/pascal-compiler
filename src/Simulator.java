@@ -1,4 +1,5 @@
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Stack;
 
 public class Simulator {
@@ -7,6 +8,9 @@ public class Simulator {
     private static Object val = 0;
 
     private static Stack<Object> stack = new Stack<>();
+    private static SymbolTable symbolTable;
+
+    private static HashMap<Integer, Integer> dataMap;
 
     private static Byte[] instructions;
 
@@ -15,7 +19,7 @@ public class Simulator {
 
         do {
             opCode = getOpCode();
-            System.out.println(opCode);
+//            System.out.println(opCode);
             switch (opCode) {
                 case PUSHI:
                     pushi();
@@ -30,16 +34,16 @@ public class Simulator {
                     getAddressValue();
                     break;
                 case PRINT_REAL:
-                    writeln();
+                    printInt();
                     break;
                 case PRINT_INT:
-                    writeln();
+                    printInt();
                     break;
                 case PRINT_BOOL:
-                    writeln();
+                    printBool();
                     break;
                 case PRINT_CHAR:
-                    writeln();
+                    printChar();
                     break;
                 case HALT:
                     halt();
@@ -80,9 +84,21 @@ public class Simulator {
         while (opCode != Parser.OP_CODE.HALT);
     }
 
-    public static void writeln(){
-        Object val = stack.pop();
-        System.out.println(val);
+    private static void printBool() {
+        int val = dataMap.get(getAddressValue());
+        if (val == 1) {
+            System.out.println("True");
+        } else {
+            System.out.println("False");
+        }
+    }
+
+    public static void printInt(){
+        System.out.println(dataMap.get(getAddressValue()));
+    }
+
+    public static void printChar(){
+        System.out.println(Character.toChars(dataMap.get(getAddressValue()))[0]);
     }
 
     public static void add(){
@@ -157,9 +173,15 @@ public class Simulator {
     }
 
     public static Object pop(){
-        // TODO: Assign pop to symbolTable
-        getAddressValue();
-        return stack.pop();
+        int val = (int) stack.pop();
+        int address = getAddressValue();
+
+        if (dataMap.get(address) == null) {
+            dataMap.put(address, val);
+        }
+
+
+        return val;
     }
 
     public static void jmp(){
@@ -187,5 +209,9 @@ public class Simulator {
 
     public static void setInstructions(Byte[] instructions) {
         Simulator.instructions = instructions;
+    }
+
+    public static void setDataMap(HashMap<Integer, Integer> dataMap) {
+        Simulator.dataMap = dataMap;
     }
 }

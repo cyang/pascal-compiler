@@ -13,6 +13,7 @@ public final class Emulator {
 
         Byte[] instructions = Parser.parse();
         Simulator.setInstructions(instructions);
+        Simulator.setDataMap(Parser.getDataMap());
 
         System.out.println("\n Starting simulator:");
         Simulator.simulate();

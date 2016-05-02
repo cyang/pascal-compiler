@@ -6,9 +6,10 @@ public class Symbol {
 
     Symbol next; // pointer to the next entry in the symbolTable bucket list
 
-    public Symbol(String name, Parser.TYPE dataType){
+    public Symbol(String name, Parser.TYPE dataType, int address){
         this.name = name;
         this.dataType = dataType;
+        this.address = address;
     }
 
     public String getName() {
