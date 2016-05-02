@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public final class TokenScanner {
-    // TODO Fix lineCol and lineRow, Add BOOLLIT, CHARLIT
+    // TODO Fix lineCol and lineRow, Add, CHARLIT
 
 
     private static String tokenName = "";
@@ -258,8 +258,14 @@ public final class TokenScanner {
             generateToken(KEYWORDS_TOKEN.get(tokenName));
         } else {
             if (tokenName.length() > 0) {
-                System.out.println("TK_IDENTIFIER: " + tokenName);
-                generateToken("TK_IDENTIFIER");
+
+                if(tokenName.equals("true") || tokenName.equals("false")) {
+                    System.out.println("TK_BOOLLIT: " + tokenName);
+                    generateToken("TK_BOOLLIT");
+                } else {
+                    System.out.println("TK_IDENTIFIER: " + tokenName);
+                    generateToken("TK_IDENTIFIER");
+                }
             }
         }
 

@@ -15,7 +15,7 @@ public final class Emulator {
         Simulator.setInstructions(instructions);
         Simulator.setDataMap(Parser.getDataMap());
 
-        System.out.println("\n Starting simulator:");
+        System.out.println("\n Output:");
         Simulator.simulate();
 
 

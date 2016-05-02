@@ -8,7 +8,7 @@ public final class Parser {
         I, R, B, C, S
     }
 
-    private static HashMap<Integer, Integer> dataMap = new HashMap<>();
+    private static HashMap<Integer, Object> dataMap = new HashMap<>();
     private static int dataAddress = 0;
 
     private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
@@ -32,7 +32,7 @@ public final class Parser {
         EQL, NEQL, GEQ, LEQ, GTR, LSS,
         FGTR, FLSS,
         HALT,
-        PRINT_INT, PRINT_CHAR, PRINT_BOOL, PRINT_REAL
+        PRINT_INT, PRINT_CHAR, PRINT_BOOL, PRINT_REAL, PRINT_NEWLINE
     }
 
     private static final int ADDRESS_SIZE = 4;
@@ -194,7 +194,10 @@ public final class Parser {
 
     }
 
+
+    // for <F> to <F> do <stat>
     private static void forStat() {
+        match("TK_FOR");
     }
 
     // repeat <stat> until <cond>
@@ -321,6 +324,7 @@ public final class Parser {
                         break;
                     case "TK_CLOSE_PARENTHESIS":
                         match("TK_CLOSE_PARENTHESIS");
+                        genOpCode(OP_CODE.PRINT_NEWLINE);
                         return;
                     default:
                         throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
@@ -617,7 +621,7 @@ public final class Parser {
         it = tokenArrayList.iterator();
     }
 
-    public static HashMap<Integer, Integer> getDataMap() {
+    public static HashMap<Integer, Object> getDataMap() {
         return dataMap;
     }
 }

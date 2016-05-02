@@ -10,7 +10,7 @@ public class Simulator {
     private static Stack<Object> stack = new Stack<>();
     private static SymbolTable symbolTable;
 
-    private static HashMap<Integer, Integer> dataMap;
+    private static HashMap<Integer, Object> dataMap;
 
     private static Byte[] instructions;
 
@@ -44,6 +44,9 @@ public class Simulator {
                     break;
                 case PRINT_CHAR:
                     printChar();
+                    break;
+                case PRINT_NEWLINE:
+                    System.out.println();
                     break;
                 case HALT:
                     halt();
@@ -85,20 +88,20 @@ public class Simulator {
     }
 
     private static void printBool() {
-        int val = dataMap.get(getAddressValue());
+        Integer val = (int) dataMap.get(getAddressValue());
         if (val == 1) {
-            System.out.println("True");
+            System.out.print("True");
         } else {
-            System.out.println("False");
+            System.out.print("False");
         }
     }
 
     public static void printInt(){
-        System.out.println(dataMap.get(getAddressValue()));
+        System.out.print(dataMap.get(getAddressValue()));
     }
 
     public static void printChar(){
-        System.out.println(Character.toChars(dataMap.get(getAddressValue()))[0]);
+        System.out.print(Character.toChars((int) dataMap.get(getAddressValue()))[0]);
     }
 
     public static void add(){
@@ -139,14 +142,18 @@ public class Simulator {
     }
 
     public static void fdiv(){
-        float val1 = (float) stack.pop();
-        float val2 = (float) stack.pop();
+        Integer intval2 = (Integer) stack.pop();
+        Float val2 = (float) intval2;
+
+        Integer intval1 = (Integer) stack.pop();
+        Float val1 = (float) intval1;
+
         stack.push(val1 / val2);
     }
 
     public static void div(){
-        int val1 = (int) stack.pop();
         int val2 = (int) stack.pop();
+        int val1 = (int) stack.pop();
         stack.push(val1 / val2);
     }
 
@@ -173,7 +180,7 @@ public class Simulator {
     }
 
     public static Object pop(){
-        int val = (int) stack.pop();
+        Object val = stack.pop();
         int address = getAddressValue();
 
         if (dataMap.get(address) == null) {
@@ -190,7 +197,7 @@ public class Simulator {
 
 
     public static void halt() {
-        System.out.println("\n Program finished running");
+        System.out.println("\n\nProgram finished running");
         System.exit(0);
     }
 
@@ -211,7 +218,7 @@ public class Simulator {
         Simulator.instructions = instructions;
     }
 
-    public static void setDataMap(HashMap<Integer, Integer> dataMap) {
+    public static void setDataMap(HashMap<Integer, Object> dataMap) {
         Simulator.dataMap = dataMap;
     }
 }
