@@ -1,16 +1,14 @@
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 import java.util.Stack;
 
 public class Simulator {
 
     private static int ip = 0;
-    private static Object val = 0;
+    private static int dp = 0;
 
     private static Stack<Object> stack = new Stack<>();
-    private static SymbolTable symbolTable;
 
-    private static HashMap<Integer, Object> dataMap;
+    private static Byte[] dataArray = new Byte[1000];
 
     private static Byte[] instructions;
 
@@ -34,7 +32,7 @@ public class Simulator {
                     getAddressValue();
                     break;
                 case PRINT_REAL:
-                    printInt();
+                    printReal();
                     break;
                 case PRINT_INT:
                     printInt();
@@ -87,8 +85,19 @@ public class Simulator {
         while (opCode != Parser.OP_CODE.HALT);
     }
 
+    private static void printReal() {
+        dp = getAddressValue();
+
+        byte[] valArray = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            valArray[i] = dataArray[dp++];
+        }
+
+        System.out.print(ByteBuffer.wrap(valArray).getFloat());
+    }
+
     private static void printBool() {
-        Integer val = (int) dataMap.get(getAddressValue());
+        int val = getData();
         if (val == 1) {
             System.out.print("True");
         } else {
@@ -97,11 +106,11 @@ public class Simulator {
     }
 
     public static void printInt(){
-        System.out.print(dataMap.get(getAddressValue()));
+        System.out.print(getData());
     }
 
     public static void printChar(){
-        System.out.print(Character.toChars((int) dataMap.get(getAddressValue()))[0]);
+        System.out.print(Character.toChars(getData())[0]);
     }
 
     public static void add(){
@@ -181,10 +190,19 @@ public class Simulator {
 
     public static Object pop(){
         Object val = stack.pop();
-        int address = getAddressValue();
+        dp = getAddressValue();
 
-        if (dataMap.get(address) == null) {
-            dataMap.put(address, val);
+
+        byte[] valBytes;
+        if (val instanceof Integer) {
+            valBytes = ByteBuffer.allocate(4).putInt((int) val).array();
+        } else {
+            valBytes = ByteBuffer.allocate(4).putFloat((float) val).array();
+        }
+
+
+        for (byte b: valBytes) {
+            dataArray[dp++] = b;
         }
 
 
@@ -210,6 +228,18 @@ public class Simulator {
         return ByteBuffer.wrap(valArray).getInt();
     }
 
+    public static int getData() {
+        dp = getAddressValue();
+
+        byte[] valArray = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            valArray[i] = dataArray[dp++];
+        }
+
+        return ByteBuffer.wrap(valArray).getInt();
+    }
+
+
     public static Parser.OP_CODE getOpCode(){
         return Parser.OP_CODE.values()[instructions[ip++]];
     }
@@ -218,7 +248,4 @@ public class Simulator {
         Simulator.instructions = instructions;
     }
 
-    public static void setDataMap(HashMap<Integer, Object> dataMap) {
-        Simulator.dataMap = dataMap;
-    }
 }

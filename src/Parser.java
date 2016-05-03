@@ -8,8 +8,7 @@ public final class Parser {
         I, R, B, C, S
     }
 
-    private static HashMap<Integer, Object> dataMap = new HashMap<>();
-    private static int dataAddress = 0;
+    private static int dp = 0;
 
     private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
     static {
@@ -119,13 +118,11 @@ public final class Parser {
             // Add the correct datatype for each identifier and insert into symbol table
             for (Token identifier : identifierArrayList) {
 
-                dataMap.put(dataAddress, null);
-
                 Symbol symbol = new Symbol(identifier.getTokenValue(),
                         STRING_TYPE_HASH_MAP.get(dataType.toLowerCase().substring(3)),
-                        dataAddress);
+                        dp);
 
-                dataAddress += 4;
+                dp += 4;
 
 
                 if (SymbolTable.lookup(identifier.getTokenValue()) == null) {
@@ -291,6 +288,8 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
+            // TODO works only for identifiers
+
             Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
             if (symbol != null) {
 
@@ -589,8 +588,6 @@ public final class Parser {
         for (byte b: intBytes) {
             byteArray[ip++] = b;
         }
-
-
     }
 
     public static void genAddress(float a){
@@ -619,9 +616,5 @@ public final class Parser {
 
     public static void setTokenArrayListIterator(ArrayList<Token> tokenArrayList) {
         it = tokenArrayList.iterator();
-    }
-
-    public static HashMap<Integer, Object> getDataMap() {
-        return dataMap;
     }
 }
