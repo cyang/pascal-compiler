@@ -192,9 +192,60 @@ public final class Parser {
     }
 
 
-    // for <F> to <F> do <stat>
+    // for <variable name> := <initial value> to <final value> do <stat>
     private static void forStat() {
         match("TK_FOR");
+
+        String varName = currentToken.getTokenValue();
+        assignmentStat();
+
+        int target = ip;
+
+
+        Symbol symbol = SymbolTable.lookup(varName);
+        if (symbol != null) {
+            int address = symbol.getAddress();
+            match("TK_TO");
+
+            // Generate op code for x <= <upper bound>
+            genOpCode(OP_CODE.PUSH);
+            genAddress(address);
+            genOpCode(OP_CODE.PUSHI);
+            genAddress(Integer.valueOf(currentToken.getTokenValue()));
+
+            genOpCode(OP_CODE.LEQ);
+            match("TK_INTLIT");
+
+            match("TK_DO");
+
+            genOpCode(OP_CODE.JFALSE);
+            int hole = ip;
+            genAddress(0);
+
+            match("TK_BEGIN");
+            statements();
+            match("TK_END");
+            match("TK_SEMI_COLON");
+
+            // Generate op code for x := x + 1;
+            genOpCode(OP_CODE.PUSH);
+            genAddress(address);
+            genOpCode(OP_CODE.PUSHI);
+            genAddress(1);
+            genOpCode(OP_CODE.ADD);
+
+            genOpCode(OP_CODE.POP);
+            genAddress(address);
+
+
+            genOpCode(OP_CODE.JMP);
+            genAddress(target);
+
+            int save = ip;
+            ip = hole;
+            genAddress(save);
+            ip = save;
+        }
     }
 
     // repeat <stat> until <cond>
