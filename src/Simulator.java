@@ -52,11 +52,29 @@ public class Simulator {
                 case HALT:
                     halt();
                     break;
+                case EQL:
+                    eql();
+                    break;
+                case NEQL:
+                    neql();
+                    break;
                 case LSS:
                     less();
                     break;
+                case LEQ:
+                    lessEql();
+                    break;
+                case GTR:
+                    greater();
+                    break;
+                case GEQ:
+                    greaterEql();
+                    break;
                 case JFALSE:
                     jfalse();
+                    break;
+                case JTRUE:
+                    jtrue();
                     break;
                 case ADD:
                     add();
@@ -90,12 +108,40 @@ public class Simulator {
         while (opCode != Parser.OP_CODE.HALT);
     }
 
+    private static void jtrue() {
+        if (stack.pop().toString().equals("true")){
+            ip = getAddressValue();
+        } else {
+            getAddressValue();
+        }
+    }
+
     private static void jfalse() {
         if (stack.pop().toString().equals("false")){
             ip = getAddressValue();
         } else {
             getAddressValue();
         }
+    }
+
+    private static void eql() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(val1.equals(val2));
+    }
+
+    private static void neql() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(!val1.equals(val2));
     }
 
     private static void less() {
@@ -106,6 +152,36 @@ public class Simulator {
         Float val1 = (float) intVal1;
 
         stack.push(val1 < val2);
+    }
+
+    private static void greater() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(val1 > val2);
+    }
+
+    private static void lessEql() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(val1 <= val2);
+    }
+
+    private static void greaterEql() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(val1 >= val2);
     }
 
     private static void printReal() {
