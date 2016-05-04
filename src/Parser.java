@@ -426,6 +426,9 @@ public final class Parser {
             case "TK_IDENTIFIER":
                 Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
                 if (symbol != null) {
+                    genOpCode(OP_CODE.PUSH);
+                    genAddress(symbol.getAddress());
+
                     match("TK_IDENTIFIER");
                     return symbol.getDataType();
                 } else {

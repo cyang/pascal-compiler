@@ -1,11 +1,13 @@
 program ifElse;
 
-var x : integer;
+var x, y: integer;
 
 begin
     x := 100;
-    if x < 5 then
-        writeln('Less than 5')
+    y := 200;
+
+    if x < y then
+        writeln(x)
     else
-        writeln('Greater than 5');
+        writeln(y);
 end.

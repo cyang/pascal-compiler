@@ -19,6 +19,9 @@ public class Simulator {
             opCode = getOpCode();
 //            System.out.println(opCode);
             switch (opCode) {
+                case PUSH:
+                    push();
+                    break;
                 case PUSHI:
                     pushi();
                     break;
@@ -29,7 +32,7 @@ public class Simulator {
                     cvr();
                     break;
                 case JMP:
-                    getAddressValue();
+                    jmp();
                     break;
                 case PRINT_REAL:
                     printReal();
@@ -50,8 +53,10 @@ public class Simulator {
                     halt();
                     break;
                 case LSS:
+                    less();
                     break;
                 case JFALSE:
+                    jfalse();
                     break;
                 case ADD:
                     add();
@@ -83,6 +88,24 @@ public class Simulator {
 
         }
         while (opCode != Parser.OP_CODE.HALT);
+    }
+
+    private static void jfalse() {
+        if (stack.pop().toString().equals("false")){
+            ip = getAddressValue();
+        } else {
+            getAddressValue();
+        }
+    }
+
+    private static void less() {
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
+
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
+
+        stack.push(val1 < val2);
     }
 
     private static void printReal() {
@@ -151,11 +174,11 @@ public class Simulator {
     }
 
     public static void fdiv(){
-        Integer intval2 = (Integer) stack.pop();
-        Float val2 = (float) intval2;
+        Integer intVal2 = (Integer) stack.pop();
+        Float val2 = (float) intVal2;
 
-        Integer intval1 = (Integer) stack.pop();
-        Float val1 = (float) intval1;
+        Integer intVal1 = (Integer) stack.pop();
+        Float val1 = (float) intVal1;
 
         stack.push(val1 / val2);
     }
@@ -180,12 +203,11 @@ public class Simulator {
 
     public static void pushi(){
         int val = getAddressValue();
-//        System.out.println(val);
         stack.push(val);
     }
 
-    public static void push(Object val){
-        stack.push(val);
+    public static void push(){
+        stack.push(getData());
     }
 
     public static Object pop(){
