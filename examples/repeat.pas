@@ -3,8 +3,9 @@ var x: integer;
 
 begin
     x := 0;
+    writeln(x);
     repeat
-        writeln(x);
         x := x + 1;
-    until x = 10;
+    until x >= 10;
+    writeln(x);
 end.

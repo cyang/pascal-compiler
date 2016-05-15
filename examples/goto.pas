@@ -1,0 +1,5 @@
+program gotoProgram;
+
+begin
+
+end.

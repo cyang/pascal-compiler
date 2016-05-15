@@ -1,13 +1,28 @@
+/*
+Example:
+    var x,y,z : integer;
+    x := 2
+
+    For variable x:
+        name = "x"
+        tokenType = "TK_A_VAR"
+        dataType = TYPE.I
+        value = 2
+        address = 0
+ */
+
 public class Symbol {
     private String name = "";
+    private String tokenType = "";
     private Parser.TYPE dataType = null;
     private Object value = null;
     private int address;
 
     Symbol next; // pointer to the next entry in the symbolTable bucket list
 
-    public Symbol(String name, Parser.TYPE dataType, int address){
+    public Symbol(String name, String tokenType, Parser.TYPE dataType, int address){
         this.name = name;
+        this.tokenType = tokenType;
         this.dataType = dataType;
         this.address = address;
     }
@@ -42,5 +57,13 @@ public class Symbol {
 
     public void setAddress(int address) {
         this.address = address;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

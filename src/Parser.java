@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public final class Parser {
     enum TYPE {
-        I, R, B, C, S
+        I, R, B, C, S, P
     }
 
     private static int dp = 0;
@@ -80,7 +80,42 @@ public final class Parser {
      */
     public static void declarations() {
         varDeclarations();
+        procDeclarations();
         // TODO
+    }
+
+    /*
+    <procedure decl> -> procedure <name> [params];
+        <declarations>
+        <begin-statement>
+            <statement> -> <procedure call>
+    */
+    private static void procDeclarations() {
+        // declaration
+        if (currentToken.getTokenType().equals("TK_PROCEDURE")) {
+            match("TK_PROCEDURE");
+            currentToken.setTokenType("TK_A_PROC");
+
+            Symbol symbol = new Symbol(currentToken.getTokenValue(),
+                    "TK_A_PROC",
+                    TYPE.P,
+                    dp);
+
+            dp += 4;
+            if (SymbolTable.lookup(currentToken.getTokenValue()) == null) {
+                SymbolTable.insert(symbol);
+            }
+
+            match("TK_A_PROC");
+            match("TK_SEMI_COLON");
+
+            // body
+            match("TK_BEGIN");
+
+            statements();
+            match("TK_END");
+            match("TK_SEMI_COLON");
+        }
     }
 
 
@@ -98,13 +133,13 @@ public final class Parser {
             }
 
             // Store identifiers in a list
-            ArrayList<Token> identifierArrayList = new ArrayList<>();
+            ArrayList<Token> variablesArrayList = new ArrayList<>();
 
             while ("TK_IDENTIFIER".equals(currentToken.getTokenType())) {
+                currentToken.setTokenType("TK_A_VAR");
+                variablesArrayList.add(currentToken);
 
-                identifierArrayList.add(currentToken);
-
-                match("TK_IDENTIFIER");
+                match("TK_A_VAR");
 
                 if ("TK_COMMA".equals(currentToken.getTokenType())) {
                     match("TK_COMMA");
@@ -116,16 +151,17 @@ public final class Parser {
             match(dataType);
 
             // Add the correct datatype for each identifier and insert into symbol table
-            for (Token identifier : identifierArrayList) {
+            for (Token var : variablesArrayList) {
 
-                Symbol symbol = new Symbol(identifier.getTokenValue(),
+                Symbol symbol = new Symbol(var.getTokenValue(),
+                        "TK_A_VAR",
                         STRING_TYPE_HASH_MAP.get(dataType.toLowerCase().substring(3)),
                         dp);
 
                 dp += 4;
 
 
-                if (SymbolTable.lookup(identifier.getTokenValue()) == null) {
+                if (SymbolTable.lookup(var.getTokenValue()) == null) {
                     SymbolTable.insert(symbol);
                 }
             }
@@ -163,6 +199,12 @@ public final class Parser {
     public static void statements(){
         while(!currentToken.getTokenType().equals("TK_END")) {
             switch (currentToken.getTokenType()) {
+                case "TK_CASE":
+                    caseStat();
+                    break;
+                case "TK_GOTO":
+                    gotoStat();
+                    break;
                 case "TK_WHILE":
                     whileStat();
                     break;
@@ -178,8 +220,14 @@ public final class Parser {
                 case "TK_WRITELN":
                     writeStat();
                     break;
-                case "TK_IDENTIFIER":
+                case "TK_A_VAR":
                     assignmentStat();
+                    break;
+                case "TK_IDENTIFIER":
+                    Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+                    if (symbol != null) {
+                        currentToken.setTokenType(symbol.getTokenType());
+                    }
                     break;
                 case "TK_SEMI_COLON":
                     match("TK_SEMI_COLON");
@@ -189,6 +237,9 @@ public final class Parser {
             }
         }
 
+    }
+
+    private static void gotoStat() {
     }
 
 
@@ -331,6 +382,10 @@ public final class Parser {
           <list of ranges> 1..2,30..40:
     */
     public static void caseStat() {
+        match("TK_CASE");
+        TYPE t = E();
+        match("TK_OF");
+
 
     }
 
@@ -339,7 +394,7 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
-            // TODO works only for identifiers
+            // TODO works only for variables
 
             Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
             if (symbol != null) {
@@ -391,7 +446,7 @@ public final class Parser {
             int lhsAddress = symbol.getAddress();
 
 
-            match("TK_IDENTIFIER");
+            match("TK_A_VAR");
             match("TK_ASSIGNMENT");
 
             TYPE rhsType = E();
@@ -477,11 +532,16 @@ public final class Parser {
             case "TK_IDENTIFIER":
                 Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
                 if (symbol != null) {
-                    genOpCode(OP_CODE.PUSH);
-                    genAddress(symbol.getAddress());
+                    if (symbol.getTokenType().equals("TK_A_VAR")) {
+                        // variable
+                        currentToken.setTokenType("TK_A_VAR");
 
-                    match("TK_IDENTIFIER");
-                    return symbol.getDataType();
+                        genOpCode(OP_CODE.PUSH);
+                        genAddress(symbol.getAddress());
+
+                        match("TK_A_VAR");
+                        return symbol.getDataType();
+                    }
                 } else {
                     throw new Error(String.format("Symbol not found (%s)", currentToken.getTokenValue()));
                 }
