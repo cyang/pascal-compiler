@@ -17,6 +17,7 @@ public class Symbol {
     private Parser.TYPE dataType = null;
     private Object value = null;
     private int address;
+    private int returnAddress;
 
     Symbol next; // pointer to the next entry in the symbolTable bucket list
 
@@ -65,5 +66,13 @@ public class Symbol {
 
     public void setTokenType(String tokenType) {
         this.tokenType = tokenType;
+    }
+
+    public int getReturnAddress() {
+        return returnAddress;
+    }
+
+    public void setReturnAddress(int returnAddress) {
+        this.returnAddress = returnAddress;
     }
 }

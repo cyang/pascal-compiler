@@ -96,25 +96,42 @@ public final class Parser {
             match("TK_PROCEDURE");
             currentToken.setTokenType("TK_A_PROC");
 
-            Symbol symbol = new Symbol(currentToken.getTokenValue(),
-                    "TK_A_PROC",
-                    TYPE.P,
-                    dp);
-
-            dp += 4;
-            if (SymbolTable.lookup(currentToken.getTokenValue()) == null) {
-                SymbolTable.insert(symbol);
-            }
+            String procedureName = currentToken.getTokenValue();
 
             match("TK_A_PROC");
             match("TK_SEMI_COLON");
 
+            // generate hole to jump past the body
+            genOpCode(OP_CODE.JMP);
+            int hole = ip;
+            genAddress(0);
+
+            Symbol symbol = new Symbol(procedureName,
+                    "TK_A_PROC",
+                    TYPE.P,
+                    ip);
+
             // body
             match("TK_BEGIN");
-
             statements();
             match("TK_END");
             match("TK_SEMI_COLON");
+
+            // hole to return the procedure
+            genOpCode(OP_CODE.JMP);
+            symbol.setReturnAddress(ip);
+            genAddress(0);
+
+            if (SymbolTable.lookup(procedureName) == null) {
+                SymbolTable.insert(symbol);
+            }
+
+            // fill in the hole to jump past the body
+            int save = ip;
+
+            ip = hole;
+            genAddress(save);
+            ip = save;
         }
     }
 
@@ -220,14 +237,18 @@ public final class Parser {
                 case "TK_WRITELN":
                     writeStat();
                     break;
-                case "TK_A_VAR":
-                    assignmentStat();
-                    break;
                 case "TK_IDENTIFIER":
                     Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
                     if (symbol != null) {
+                        // assign token type ot be var or proc
                         currentToken.setTokenType(symbol.getTokenType());
                     }
+                    break;
+                case "TK_A_VAR":
+                    assignmentStat();
+                    break;
+                case "TK_A_PROC":
+                    procedureStat();
                     break;
                 case "TK_SEMI_COLON":
                     match("TK_SEMI_COLON");
@@ -237,6 +258,25 @@ public final class Parser {
             }
         }
 
+    }
+
+    private static void procedureStat() {
+        Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+        if (symbol != null) {
+            int address = symbol.getAddress();
+            match("TK_A_PROC");
+            match("TK_SEMI_COLON");
+            // call procedure
+            genOpCode(OP_CODE.JMP);
+            genAddress(address);
+
+            int restore = ip;
+
+            // fill in return hole and restore ip
+            ip = symbol.getReturnAddress();
+            genAddress(restore);
+            ip = restore;
+        }
     }
 
     private static void gotoStat() {
