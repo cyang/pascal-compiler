@@ -236,13 +236,16 @@ public final class TokenScanner {
                 tokenName += element;
 
                 if (!readingString) {
+                    // Remove trailing quotes
+                    tokenName = tokenName.substring(1, tokenName.length()-1);
+
                     // Found end quote
-                    if (tokenName.length() > 1) {
-                        System.out.println("TK_STRLIT: " + tokenName);
-                        generateToken("TK_STRLIT");
-                    } else if (tokenName.length() == 1) {
+                    if (tokenName.length() == 1) {
                         System.out.println("TK_CHARLIT: " + tokenName);
                         generateToken("TK_CHARLIT");
+                    } else if (tokenName.length() > 1) {
+                        System.out.println("TK_STRLIT: " + tokenName);
+                        generateToken("TK_STRLIT");
                     }
                 }
                 lineCol++;

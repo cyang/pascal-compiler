@@ -16,7 +16,7 @@ public final class Parser {
         STRING_TYPE_HASH_MAP.put("integer", TYPE.I);
         STRING_TYPE_HASH_MAP.put("real", TYPE.R);
         STRING_TYPE_HASH_MAP.put("boolean", TYPE.B);
-        STRING_TYPE_HASH_MAP.put("character", TYPE.C);
+        STRING_TYPE_HASH_MAP.put("char", TYPE.C);
         STRING_TYPE_HASH_MAP.put("string", TYPE.S);
     }
 
@@ -80,7 +80,7 @@ public final class Parser {
      */
     public static void declarations() {
         varDeclarations();
-        procDeclarations();
+        procDeclaration();
         // TODO
     }
 
@@ -90,7 +90,7 @@ public final class Parser {
         <begin-statement>
             <statement> -> <procedure call>
     */
-    private static void procDeclarations() {
+    private static void procDeclaration() {
         // declaration
         if (currentToken.getTokenType().equals("TK_PROCEDURE")) {
             match("TK_PROCEDURE");
@@ -731,12 +731,12 @@ public final class Parser {
     }
 
     public static void genOpCode(OP_CODE b){
-        System.out.println(String.format("OP_CODE: %s", b));
+//        System.out.println(String.format("OP_CODE: %s", b));
         byteArray[ip++] = (byte)(b.ordinal());
     }
 
     public static void genAddress(int a){
-        System.out.println(String.format("ADDRESS_VALUE: %s", a));
+//        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
         for (byte b: intBytes) {
@@ -745,7 +745,7 @@ public final class Parser {
     }
 
     public static void genAddress(float a){
-        System.out.println(String.format("ADDRESS_VALUE: %s", a));
+//        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putFloat(a).array();
 
         for (byte b: intBytes) {

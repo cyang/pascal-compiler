@@ -1,15 +1,17 @@
 program caseProgram;
-var grade, num: integer;
+var gradeNumber: integer;
+var gradeLetter: char;
+
 
 begin
-    grade := 100;
+    gradeNumber := 80;
 
-    case (grade) of
-    100 : writeln();
-    90, 'C': writeln('Well done');
-    80 : writeln('You passed');
-    70 : writeln('Better try again');
+    case (gradeNumber) of
+    100 : gradeLetter := 'a';
+    90 : gradeLetter := 'b';
+    80 : gradeLetter := 'c';
+    70 : gradeLetter := 'd';
     end;
 
-    writeln('Your grade is ', grade );
+    writeln(gradeLetter);
 end.
