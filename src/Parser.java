@@ -19,6 +19,8 @@ public final class Parser {
         STRING_TYPE_HASH_MAP.put("boolean", TYPE.B);
         STRING_TYPE_HASH_MAP.put("char", TYPE.C);
         STRING_TYPE_HASH_MAP.put("string", TYPE.S);
+        STRING_TYPE_HASH_MAP.put("array", TYPE.A);
+
     }
 
     enum OP_CODE {
@@ -238,8 +240,103 @@ public final class Parser {
                 }
             }
 
+            if (dataType.equals("TK_ARRAY")){
+                arrayDeclaration(variablesArrayList);
+            }
+
             match("TK_SEMI_COLON");
+
         }
+    }
+
+
+    /*
+    <var decl> -> var <namelist>: <type>
+    	<type> -> integer | real | bool | char
+				<array type>
+	    <array type> -> array[<low>..<high>]
+				of <type> (simple type, array not allowed)
+
+
+	    <low>,<high> ->
+            ordinal constants of the same type
+     */
+    private static void arrayDeclaration(ArrayList<Token> variablesArrayList) {
+        match("TK_OPEN_SQUARE_BRACKET");
+        String v1 = currentToken.getTokenValue();
+        TYPE indexType1 = F();
+        match("TK_RANGE");
+        String v2 = currentToken.getTokenValue();
+        TYPE indexType2 = F();
+        match("TK_CLOSE_SQUARE_BRACKET");
+        match("TK_OF");
+
+        String valueType = currentToken.getTokenType();
+        match(valueType);
+
+        if (indexType1 != indexType2){
+            throw new Error(String.format("Array index LHS type (%s) is not equal to RHS type: (%s)", indexType1, indexType2));
+        } else {
+
+            switch (indexType1) {
+                case I:
+                    int i1 = Integer.valueOf(v1);
+                    int i2 = Integer.valueOf(v2);
+                    if (i1 > i2){
+                        throw new Error(String.format("Array range is invalid: %d..%d", i1, i2));
+                    }
+
+                    for (Token var: variablesArrayList) {
+                        Symbol symbol = SymbolTable.lookup(var.getTokenValue());
+                        if (symbol != null){
+                            symbol.setLow(i1);
+                            symbol.setHigh(i2);
+                            symbol.setIndexType(TYPE.I);
+                            symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
+                        }
+                    }
+
+                    break;
+                case R:
+                    int f1 = Integer.valueOf(v1);
+                    int f2 = Integer.valueOf(v2);
+                    if (f1 > f2){
+                        throw new Error(String.format("Array range is invalid: %d..%d", f1, f2));
+                    }
+
+                    for (Token var: variablesArrayList) {
+                        Symbol symbol = SymbolTable.lookup(var.getTokenValue());
+                        if (symbol != null){
+                            symbol.setLow(f1);
+                            symbol.setHigh(f2);
+                            symbol.setIndexType(TYPE.R);
+                            symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
+                        }
+                    }
+
+                    break;
+                case C:
+                    char c1 = v1.toCharArray()[0];
+                    char c2 = v2.toCharArray()[0];
+                    if (c1 > c2){
+                        throw new Error(String.format("Array range is invalid: %c..%c", c1, c2));
+                    }
+
+                    for (Token var: variablesArrayList) {
+                        Symbol symbol = SymbolTable.lookup(var.getTokenValue());
+                        if (symbol != null){
+                            symbol.setLow(c1);
+                            symbol.setHigh(c2);
+                            symbol.setIndexType(TYPE.C);
+                            symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
+                        }
+                    }
+
+                    break;
+            }
+
+        }
+
     }
 
     /*
@@ -633,8 +730,16 @@ public final class Parser {
             TYPE lhsType = symbol.getDataType();
             int lhsAddress = symbol.getAddress();
 
-
             match("TK_A_VAR");
+
+            // Handle array assignment
+            if (lhsType == TYPE.A){
+                match("TK_OPEN_SQUARE_BRACKET");
+
+                
+                match("TK_CLOSE_SQUARE_BRACKET");
+            }
+
             match("TK_ASSIGNMENT");
 
             TYPE rhsType = E();

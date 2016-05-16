@@ -19,6 +19,12 @@ public class Symbol {
     private int address;
     private int returnAddress; // return address for procedure
 
+    private Object low; // low value range for array
+    private Object high; // high value range for array
+
+    private Parser.TYPE indexType; // index type for array
+    private Parser.TYPE valueType; // value type for array
+
     Symbol next; // pointer to the next entry in the symbolTable bucket list
 
     public Symbol(String name, String tokenType, Parser.TYPE dataType, int address){
@@ -74,5 +80,37 @@ public class Symbol {
 
     public void setReturnAddress(int returnAddress) {
         this.returnAddress = returnAddress;
+    }
+
+    public Object getLow() {
+        return low;
+    }
+
+    public void setLow(Object low) {
+        this.low = low;
+    }
+
+    public Object getHigh() {
+        return high;
+    }
+
+    public void setHigh(Object high) {
+        this.high = high;
+    }
+
+    public Parser.TYPE getIndexType() {
+        return indexType;
+    }
+
+    public void setIndexType(Parser.TYPE indexType) {
+        this.indexType = indexType;
+    }
+
+    public Parser.TYPE getValueType() {
+        return valueType;
+    }
+
+    public void setValueType(Parser.TYPE valueType) {
+        this.valueType = valueType;
     }
 }
