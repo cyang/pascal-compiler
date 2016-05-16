@@ -45,7 +45,10 @@ public final class TokenScanner {
         OPERATORS_TOKEN = new HashMap<>();
         OPERATORS_TOKEN.put("(", "TK_OPEN_PARENTHESIS");
         OPERATORS_TOKEN.put(")", "TK_CLOSE_PARENTHESIS");
+        OPERATORS_TOKEN.put("[", "TK_OPEN_SQUARE_BRACKET");
+        OPERATORS_TOKEN.put("]", "TK_CLOSE_SQUARE_BRACKET");
         OPERATORS_TOKEN.put(".", "TK_DOT");
+        OPERATORS_TOKEN.put("..", "TK_RANGE");
         OPERATORS_TOKEN.put(":", "TK_COLON");
         OPERATORS_TOKEN.put(";", "TK_SEMI_COLON");
         OPERATORS_TOKEN.put("+", "TK_PLUS");
@@ -110,7 +113,6 @@ public final class TokenScanner {
 
     public static void checkCharacter(char element){
         switch (CHAR_TYPE.get(String.valueOf(element))){
-        // TODO finish falsifying readingBool
 
             case LETTER:
                 if (!readingNumber) {
@@ -162,7 +164,7 @@ public final class TokenScanner {
                         lineCol++;
                     }
                 } else {
-                    handleNumber(element);
+                    handleNumber();
                 }
                 break;
             case OPERATOR:
@@ -170,15 +172,23 @@ public final class TokenScanner {
                     // Append to a string
                     tokenName += element;
                 } else if (readingNumber) {
+                    if (isFloat && element == '.') {
+                        isFloat = false;
+                        tokenName = tokenName.substring(0,tokenName.length()-1);
+                        handleNumber();
 
-                    if (sciNotation && (element == '+' || element == '-')) {
+                        System.out.println("TK_RANGE");
+                        generateToken("TK_RANGE");
+                        tokenName = "";
+
+                    } else if (sciNotation && (element == '+' || element == '-')) {
                         tokenName += element;
                     } else if (element == '.') {
                         // Found decimal in float
                         isFloat = true;
                         tokenName += element;
                     } else {
-                        handleNumber(element);
+                        handleNumber();
 
                         System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
                         generateToken(OPERATORS_TOKEN.get(String.valueOf(element)));
@@ -292,7 +302,7 @@ public final class TokenScanner {
         tokenName = "";
     }
 
-    public static void handleNumber(char element) {
+    public static void handleNumber() {
         readingNumber = false;
         if (isFloat) {
             System.out.println("TK_FLOATLIT: " + tokenName);
