@@ -716,19 +716,19 @@ public final class Parser {
                 switch (t) {
                     case I:
                         genOpCode(OP_CODE.PRINT_INT);
-                        genAddress(address);
+//                        genAddress(address);
                         break;
                     case C:
                         genOpCode(OP_CODE.PRINT_CHAR);
-                        genAddress(address);
+//                        genAddress(address);
                         break;
                     case R:
                         genOpCode(OP_CODE.PRINT_REAL);
-                        genAddress(address);
+//                        genAddress(address);
                         break;
                     case B:
                         genOpCode(OP_CODE.PRINT_BOOL);
-                        genAddress(address);
+//                        genAddress(address);
                         break;
 
                 }
@@ -1095,12 +1095,12 @@ public final class Parser {
     }
 
     public static void genOpCode(OP_CODE b){
-//        System.out.println(String.format("OP_CODE: %s", b));
+        System.out.println(String.format("OP_CODE: %s", b));
         byteArray[ip++] = (byte)(b.ordinal());
     }
 
     public static void genAddress(int a){
-//        System.out.println(String.format("ADDRESS_VALUE: %s", a));
+        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putInt(a).array();
 
         for (byte b: intBytes) {
@@ -1109,7 +1109,7 @@ public final class Parser {
     }
 
     public static void genAddress(float a){
-//        System.out.println(String.format("ADDRESS_VALUE: %s", a));
+        System.out.println(String.format("ADDRESS_VALUE: %s", a));
         byte[] intBytes = ByteBuffer.allocate(ADDRESS_SIZE).putFloat(a).array();
 
         for (byte b: intBytes) {

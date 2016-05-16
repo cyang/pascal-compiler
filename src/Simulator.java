@@ -220,7 +220,7 @@ public class Simulator {
     }
 
     private static void printReal() {
-        dp = getAddressValue();
+        dp = getData();
 
         byte[] valArray = new byte[4];
         for (int i = 0; i < 4; i++) {
@@ -241,6 +241,7 @@ public class Simulator {
 
     public static void printInt(){
         System.out.print(getData());
+
     }
 
     public static void printChar(){
