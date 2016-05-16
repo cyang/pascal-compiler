@@ -1,3 +1,11 @@
+/*
+Example:
+TK_INTLIT: 2
+
+    tokenType: "TK_INTLIT"
+    tokenValue: "2"
+ */
+
 public final class Token {
     private String tokenType= "";
     private String tokenValue = "";

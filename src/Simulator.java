@@ -313,7 +313,7 @@ public class Simulator {
 
 
     public static void halt() {
-        System.out.println("\n\nProgram finished running");
+        System.out.print("\n\nProgram finished with exit code 0");
         System.exit(0);
     }
 

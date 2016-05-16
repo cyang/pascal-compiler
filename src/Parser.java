@@ -423,10 +423,67 @@ public final class Parser {
     */
     public static void caseStat() {
         match("TK_CASE");
-        TYPE t = E();
+        match("TK_OPEN_PARENTHESIS");
+        Token eToken = currentToken;
+
+        TYPE t1 = E();
+
+        if (t1 == TYPE.R) {
+            throw new Error("Invalid type of real for case E");
+        }
+
+        match("TK_CLOSE_PARENTHESIS");
         match("TK_OF");
 
+        ArrayList<Integer> labelsArrayList = new ArrayList<>();
 
+        while(currentToken.getTokenType().equals("TK_INTLIT") ||
+                currentToken.getTokenType().equals("TK_CHARLIT") ||
+                currentToken.getTokenType().equals("TK_BOOLLIT")) {
+
+            TYPE t2 = E();
+            emit("TK_EQUAL", t1, t2);
+            match("TK_COLON");
+
+            // hole for JFALSE to the next case label when the eql condition fails
+            genOpCode(OP_CODE.JFALSE);
+            int hole = ip;
+            genAddress(0);
+            statements();
+
+            genOpCode(OP_CODE.JMP);
+            labelsArrayList.add(ip);
+            genAddress(0);
+
+            // Fill JFALSE hole
+            int save = ip;
+            ip = hole;
+            genAddress(save);
+
+            ip = save;
+
+            // PUSH the original eToken variable back to prepare for the next eql condition case label
+            if (!currentToken.getTokenValue().equals("TK_END")){
+                Symbol symbol = SymbolTable.lookup(eToken.getTokenValue());
+                if (symbol != null) {
+                    genOpCode(OP_CODE.PUSH);
+                    genAddress(symbol.getAddress());
+                }
+            }
+        }
+
+        match("TK_END");
+        match("TK_SEMI_COLON");
+
+        int save = ip;
+
+        // Fill all the labelHoles for JMP
+        for (Integer labelHole: labelsArrayList) {
+            ip = labelHole;
+            genAddress(save);
+        }
+
+        ip = save;
     }
 
     public static void writeStat(){
