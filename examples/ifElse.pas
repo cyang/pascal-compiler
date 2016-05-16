@@ -7,7 +7,7 @@ begin
     y := 200;
 
     if x < y then
-        writeln()
+        writeln(x)
     else
         writeln(y);
 end.

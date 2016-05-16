@@ -34,7 +34,8 @@ public final class Parser {
         EQL, NEQL, GEQ, LEQ, GTR, LSS,
         FGTR, FLSS,
         HALT,
-        PRINT_INT, PRINT_CHAR, PRINT_BOOL, PRINT_REAL, PRINT_NEWLINE
+        PRINT_INT, PRINT_CHAR, PRINT_BOOL, PRINT_REAL, PRINT_NEWLINE,
+        GET, PUT
     }
 
     private static final int ADDRESS_SIZE = 4;
@@ -286,31 +287,26 @@ public final class Parser {
                         throw new Error(String.format("Array range is invalid: %d..%d", i1, i2));
                     }
 
+                    Symbol firstIntArray = SymbolTable.lookup(variablesArrayList.get(0).getTokenValue());
+                    if (firstIntArray != null) {
+                        dp = firstIntArray.getAddress();
+                    }
+
                     for (Token var: variablesArrayList) {
                         Symbol symbol = SymbolTable.lookup(var.getTokenValue());
                         if (symbol != null){
+
+                            int elementSize = 4;
+                            int size = elementSize*(i2 - i1 + 1);
+
+                            symbol.setAddress(dp);
                             symbol.setLow(i1);
                             symbol.setHigh(i2);
+                            symbol.setTokenType("TK_AN_ARRAY");
                             symbol.setIndexType(TYPE.I);
                             symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
-                        }
-                    }
 
-                    break;
-                case R:
-                    int f1 = Integer.valueOf(v1);
-                    int f2 = Integer.valueOf(v2);
-                    if (f1 > f2){
-                        throw new Error(String.format("Array range is invalid: %d..%d", f1, f2));
-                    }
-
-                    for (Token var: variablesArrayList) {
-                        Symbol symbol = SymbolTable.lookup(var.getTokenValue());
-                        if (symbol != null){
-                            symbol.setLow(f1);
-                            symbol.setHigh(f2);
-                            symbol.setIndexType(TYPE.R);
-                            symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
+                            dp += size;
                         }
                     }
 
@@ -322,17 +318,30 @@ public final class Parser {
                         throw new Error(String.format("Array range is invalid: %c..%c", c1, c2));
                     }
 
+                    Symbol firstCharArray = SymbolTable.lookup(variablesArrayList.get(0).getTokenValue());
+                    if (firstCharArray != null) {
+                        dp = firstCharArray.getAddress();
+                    }
+
                     for (Token var: variablesArrayList) {
                         Symbol symbol = SymbolTable.lookup(var.getTokenValue());
                         if (symbol != null){
+                            int size = c2 - c1 + 1;
+
+                            symbol.setAddress(dp);
                             symbol.setLow(c1);
                             symbol.setHigh(c2);
+                            symbol.setTokenType("TK_AN_ARRAY");
                             symbol.setIndexType(TYPE.C);
                             symbol.setValueType(STRING_TYPE_HASH_MAP.get(valueType.toLowerCase().substring(3)));
+
+                            dp += size;
                         }
                     }
 
                     break;
+                case R:
+                    throw new Error("Array index type: real is invalid");
             }
 
         }
@@ -404,6 +413,9 @@ public final class Parser {
                     break;
                 case "TK_A_LABEL":
                     labelStat();
+                    break;
+                case "TK_AN_ARRAY":
+                    arrayAssignmentStat();
                     break;
                 case "TK_SEMI_COLON":
                     match("TK_SEMI_COLON");
@@ -732,14 +744,6 @@ public final class Parser {
 
             match("TK_A_VAR");
 
-            // Handle array assignment
-            if (lhsType == TYPE.A){
-                match("TK_OPEN_SQUARE_BRACKET");
-
-                
-                match("TK_CLOSE_SQUARE_BRACKET");
-            }
-
             match("TK_ASSIGNMENT");
 
             TYPE rhsType = E();
@@ -751,6 +755,90 @@ public final class Parser {
             }
         }
 
+
+    }
+
+
+    private static void arrayAssignmentStat() {
+        Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+        if (symbol != null) {
+            handleArrayAccess(symbol);
+
+            match("TK_ASSIGNMENT");
+
+
+            TYPE rhsType = E();
+            // Emit OP_CODE.PUT
+            if (symbol.getValueType() == rhsType) {
+                genOpCode(OP_CODE.PUT);
+            }
+
+        }
+
+    }
+
+    private static void handleArrayAccess(Symbol symbol) {
+        match("TK_AN_ARRAY");
+        match("TK_OPEN_SQUARE_BRACKET");
+
+        String index = currentToken.getTokenValue();
+        TYPE t = E();
+
+        if (t != symbol.getIndexType()) {
+            throw new Error(String.format("Incompatible index type: (%s, %s)", t, symbol.getIndexType()));
+        }
+
+        match("TK_CLOSE_SQUARE_BRACKET");
+
+        genOpCode(OP_CODE.PUSHI);
+
+        switch (t){
+            case I:
+
+                int i1 = (int)symbol.getLow();
+                int i2 = (int)symbol.getHigh();
+
+                // range check:
+                if (Integer.valueOf(index) < i1 || Integer.valueOf(index) > i2) {
+                    throw new Error(String.format("Index %d is not within range %d to %d",
+                            Integer.valueOf(index), i1, i2));
+                }
+
+                genAddress(i1);
+                genOpCode(OP_CODE.SUB);
+
+                // push element size
+                genOpCode(OP_CODE.PUSHI);
+                genAddress(4);
+
+                genOpCode(OP_CODE.MULT);
+
+                genOpCode(OP_CODE.PUSHI);
+                genAddress(symbol.getAddress());
+
+                genOpCode(OP_CODE.ADD);
+
+                break;
+            case C:
+                char c1 = (char)symbol.getLow();
+                char c2 = (char)symbol.getHigh();
+
+                // range check
+                if (index.toCharArray()[0] < c1 || index.toCharArray()[0] > c2) {
+                    throw new Error(String.format("Index %c is not within range %c to %c",
+                            index.toCharArray()[0], c1, c2));
+                }
+
+                genAddress(c1);
+                genOpCode(OP_CODE.SUB);
+
+                genOpCode(OP_CODE.PUSHI);
+                genAddress(symbol.getAddress());
+
+                genOpCode(OP_CODE.ADD);
+
+                break;
+        }
 
     }
 
@@ -834,6 +922,14 @@ public final class Parser {
 
                         match("TK_A_VAR");
                         return symbol.getDataType();
+                    } else if (symbol.getTokenType().equals("TK_AN_ARRAY")) {
+                        // TODO array
+                        currentToken.setTokenType("TK_AN_ARRAY");
+
+                        handleArrayAccess(symbol);
+                        genOpCode(OP_CODE.GET);
+
+                        return symbol.getValueType();
                     }
                 } else {
                     throw new Error(String.format("Symbol not found (%s)", currentToken.getTokenValue()));
