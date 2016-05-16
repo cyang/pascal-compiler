@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public final class Parser {
+    // integer, real, boolean, char, string, procedure, label, array
     enum TYPE {
-        I, R, B, C, S, P, L
+        I, R, B, C, S, P, L, A
     }
 
     private static int dp = 0; // data pointer for vars
-    private static int lp = 0; // label pointer
 
     private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
     static {
@@ -128,10 +128,7 @@ public final class Parser {
                 Symbol symbol = new Symbol(label.getTokenValue(),
                         "TK_A_LABEL",
                         TYPE.L,
-                        lp);
-
-                lp += 4;
-
+                        0);
 
                 if (SymbolTable.lookup(label.getTokenValue()) == null) {
                     SymbolTable.insert(symbol);

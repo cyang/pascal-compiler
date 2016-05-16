@@ -17,7 +17,7 @@ public class Symbol {
     private Parser.TYPE dataType = null;
     private Object value = null;
     private int address;
-    private int returnAddress;
+    private int returnAddress; // return address for procedure
 
     Symbol next; // pointer to the next entry in the symbolTable bucket list
 
