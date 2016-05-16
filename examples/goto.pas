@@ -11,6 +11,5 @@ begin
     x := 3;
 
     label1: writeln(x);
-    WriteLn(x);
 
 end.

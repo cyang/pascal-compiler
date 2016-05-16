@@ -5,10 +5,11 @@ import java.util.Iterator;
 
 public final class Parser {
     enum TYPE {
-        I, R, B, C, S, P
+        I, R, B, C, S, P, L
     }
 
-    private static int dp = 0;
+    private static int dp = 0; // data pointer for vars
+    private static int lp = 0; // label pointer
 
     private static final HashMap<String, TYPE> STRING_TYPE_HASH_MAP;
     static {
@@ -79,9 +80,66 @@ public final class Parser {
 	-> E
      */
     public static void declarations() {
-        varDeclarations();
-        procDeclaration();
-        // TODO
+        while (true) {
+            switch (currentToken.getTokenType()) {
+                case "TK_VAR":
+                    varDeclarations();
+                    break;
+                case "TK_PROCEDURE":
+                    procDeclaration();
+                    break;
+                case "TK_LABEL":
+                    labelDeclarations();
+                    break;
+                case "TK_BEGIN":
+                    return;
+            }
+        }
+    }
+
+    // label <namelist>;
+    private static void labelDeclarations() {
+        while(true) {
+            if ("TK_LABEL".equals(currentToken.getTokenType())) {
+                match("TK_LABEL");
+            } else {
+                // currentToken is not "TK_LABEL"
+                break;
+            }
+
+            // Store labels in a list
+            ArrayList<Token> labelsArrayList = new ArrayList<>();
+
+            while ("TK_IDENTIFIER".equals(currentToken.getTokenType())) {
+                currentToken.setTokenType("TK_A_LABEL");
+                labelsArrayList.add(currentToken);
+
+                match("TK_A_LABEL");
+
+                if ("TK_COMMA".equals(currentToken.getTokenType())) {
+                    match("TK_COMMA");
+                }
+            }
+
+            // insert all labels into SymbolTable
+            for (Token label : labelsArrayList) {
+
+
+                Symbol symbol = new Symbol(label.getTokenValue(),
+                        "TK_A_LABEL",
+                        TYPE.L,
+                        lp);
+
+                lp += 4;
+
+
+                if (SymbolTable.lookup(label.getTokenValue()) == null) {
+                    SymbolTable.insert(symbol);
+                }
+            }
+
+            match("TK_SEMI_COLON");
+        }
     }
 
     /*
@@ -149,7 +207,7 @@ public final class Parser {
                 break;
             }
 
-            // Store identifiers in a list
+            // Store variables in a list
             ArrayList<Token> variablesArrayList = new ArrayList<>();
 
             while ("TK_IDENTIFIER".equals(currentToken.getTokenType())) {
@@ -220,7 +278,7 @@ public final class Parser {
                     caseStat();
                     break;
                 case "TK_GOTO":
-                    gotoStat();
+                    goToStat();
                     break;
                 case "TK_WHILE":
                     whileStat();
@@ -240,7 +298,7 @@ public final class Parser {
                 case "TK_IDENTIFIER":
                     Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
                     if (symbol != null) {
-                        // assign token type ot be var or proc
+                        // assign token type to be var, proc, or label
                         currentToken.setTokenType(symbol.getTokenType());
                     }
                     break;
@@ -250,6 +308,9 @@ public final class Parser {
                 case "TK_A_PROC":
                     procedureStat();
                     break;
+                case "TK_A_LABEL":
+                    labelStat();
+                    break;
                 case "TK_SEMI_COLON":
                     match("TK_SEMI_COLON");
                     break;
@@ -258,6 +319,24 @@ public final class Parser {
             }
         }
 
+    }
+
+    private static void labelStat() {
+        Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+        match("TK_A_LABEL");
+        match("TK_COLON");
+        if (symbol != null) {
+            int hole = symbol.getAddress();
+            int save = ip;
+
+            // fill in hole for goto jump
+            ip = hole;
+            genAddress(save);
+
+            ip = save;
+
+            statements();
+        }
     }
 
     private static void procedureStat() {
@@ -279,7 +358,21 @@ public final class Parser {
         }
     }
 
-    private static void gotoStat() {
+    private static void goToStat() {
+        match("TK_GOTO");
+        Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
+        currentToken.setTokenType("TK_A_LABEL");
+        match("TK_A_LABEL");
+        genOpCode(OP_CODE.JMP);
+        int hole = ip;
+        genAddress(0);
+
+        // hole for jump
+        if (symbol != null){
+            symbol.setAddress(hole);
+        }
+
+        match("TK_SEMI_COLON");
 
     }
 
