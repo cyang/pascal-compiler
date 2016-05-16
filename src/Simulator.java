@@ -28,8 +28,17 @@ public class Simulator {
                 case POP:
                     pop();
                     break;
+                case GET:
+                    get();
+                    break;
+                case PUT:
+                    put();
+                    break;
                 case CVR:
                     cvr();
+                    break;
+                case XCHG:
+                    xchg();
                     break;
                 case JMP:
                     jmp();
@@ -106,6 +115,32 @@ public class Simulator {
 
         }
         while (opCode != Parser.OP_CODE.HALT);
+    }
+
+    private static void get() {
+        stack.push(getData());
+    }
+
+    private static Object put() {
+        Object val = stack.pop();
+        dp = (int)stack.pop();
+
+
+        byte[] valBytes;
+        if (val instanceof Integer) {
+            valBytes = ByteBuffer.allocate(4).putInt((int) val).array();
+        } else {
+            valBytes = ByteBuffer.allocate(4).putFloat((float) val).array();
+        }
+
+
+        for (byte b: valBytes) {
+            dataArray[dp++] = b;
+        }
+
+
+        return val;
+
     }
 
     private static void jtrue() {
@@ -327,7 +362,8 @@ public class Simulator {
     }
 
     public static int getData() {
-        dp = getAddressValue();
+        dp = (int)stack.pop();
+        //dp = getAddressValue();
 
         byte[] valArray = new byte[4];
         for (int i = 0; i < 4; i++) {

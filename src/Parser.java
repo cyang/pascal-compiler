@@ -265,10 +265,14 @@ public final class Parser {
     private static void arrayDeclaration(ArrayList<Token> variablesArrayList) {
         match("TK_OPEN_SQUARE_BRACKET");
         String v1 = currentToken.getTokenValue();
-        TYPE indexType1 = F();
+        TYPE indexType1 = getLitType(currentToken.getTokenType());
+        match(currentToken.getTokenType());
+
         match("TK_RANGE");
+
         String v2 = currentToken.getTokenValue();
-        TYPE indexType2 = F();
+        TYPE indexType2 = getLitType(currentToken.getTokenType());
+        match(currentToken.getTokenType());
         match("TK_CLOSE_SQUARE_BRACKET");
         match("TK_OF");
 
@@ -691,14 +695,24 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
-            // TODO works only for variables
+            // TODO works only for variables and arrays
 
             Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
             if (symbol != null) {
-
                 int address = symbol.getAddress();
+                TYPE t;
 
-                TYPE t = E();
+                if (symbol.getDataType() == TYPE.A) {
+                    currentToken.setTokenType("TK_AN_ARRAY");
+                    handleArrayAccess(symbol);
+
+                    t = symbol.getValueType();
+
+                } else {
+
+                    t = E();
+                }
+
                 switch (t) {
                     case I:
                         genOpCode(OP_CODE.PRINT_INT);
@@ -718,7 +732,6 @@ public final class Parser {
                         break;
 
                 }
-
 
                 switch (currentToken.getTokenType()) {
                     case "TK_COMMA":
@@ -805,6 +818,7 @@ public final class Parser {
                 }
 
                 genAddress(i1);
+                genOpCode(OP_CODE.XCHG);
                 genOpCode(OP_CODE.SUB);
 
                 // push element size
@@ -830,6 +844,7 @@ public final class Parser {
                 }
 
                 genAddress(c1);
+                genOpCode(OP_CODE.XCHG);
                 genOpCode(OP_CODE.SUB);
 
                 genOpCode(OP_CODE.PUSHI);
@@ -1114,6 +1129,21 @@ public final class Parser {
         } else {
 //            System.out.println(String.format("matched: %s", currentToken.getTokenType()));
             getToken();
+        }
+    }
+
+    public static TYPE getLitType(String tokenType) {
+        switch (tokenType) {
+            case "TK_INTLIT":
+                return TYPE.I;
+            case "TK_REALLIT":
+                return TYPE.R;
+            case "TK_CHARLIT":
+                return TYPE.C;
+            case "TK_BOOLLIT":
+                return TYPE.B;
+            default:
+                return null;
         }
     }
 
