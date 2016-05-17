@@ -1,6 +1,6 @@
 # pascal-compiler
 
-This is a Pascal compiler written in Java.
+This is a **Pascal** compiler written in Java.
 
 ## How do I compile?
 1. Compile emulator: `javac Emulator.java`
