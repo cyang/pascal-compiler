@@ -4,9 +4,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public final class Parser {
-    // integer, real, boolean, char, string, procedure, label, array
     enum TYPE {
-        I, R, B, C, S, P, L, A
+        I, R, B, C, S, P, L, A     // integer, real, boolean, char, string, procedure, label, array
     }
 
     private static int dp = 0; // data pointer for vars

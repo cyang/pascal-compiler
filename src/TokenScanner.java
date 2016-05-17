@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public final class TokenScanner {
-    // TODO Fix lineCol and lineRow
     private static String tokenName = "";
     private static int lineRow = 0;
     private static int lineCol = 0;
@@ -123,7 +122,6 @@ public final class TokenScanner {
                     sciNotation = true;
                 }
 
-                lineCol++;
                 break;
             case DIGIT:
                 if (tokenName.isEmpty()) {
@@ -132,7 +130,6 @@ public final class TokenScanner {
 
                 tokenName += element;
 
-                lineCol++;
                 break;
             case SPACE:
                 if (readingString){
@@ -158,8 +155,9 @@ public final class TokenScanner {
                         // Check for newline on Unix OS
                         lineRow++;
                         lineCol = 0;
-                    } else {
-                        // Continue reading line
+                    } else if (element == Character.toChars(9)[0]){
+                        lineCol+=4;
+                    } else if (element == Character.toChars(32)[0]){
                         lineCol++;
                     }
                 } else {
@@ -257,7 +255,6 @@ public final class TokenScanner {
                         generateToken(OPERATORS_TOKEN.get(tokenName));
                     }
                 }
-                lineCol++;
                 break;
             case QUOTE:
                 // Found begin/end quote
@@ -277,7 +274,6 @@ public final class TokenScanner {
                         generateToken("TK_STRLIT");
                     }
                 }
-                lineCol++;
                 break;
             default:
                 throw new Error("Unhandled element scanned");
@@ -318,6 +314,9 @@ public final class TokenScanner {
     public static void generateToken(String tokenType) {
         Token t = new Token(tokenType, tokenName, lineCol, lineRow);
         tokenArrayList.add(t);
+
+        lineCol += tokenName.length();
+
         tokenName = "";
     }
 
