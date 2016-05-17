@@ -15,7 +15,6 @@ public class Symbol {
     private String name = "";
     private String tokenType = "";
     private Parser.TYPE dataType = null;
-    private Object value = null;
     private int address;
     private int returnAddress; // return address for procedure
 
@@ -44,18 +43,6 @@ public class Symbol {
 
     public Parser.TYPE getDataType() {
         return dataType;
-    }
-
-    public void setDataType(Parser.TYPE dataType) {
-        this.dataType = dataType;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
     }
 
     public int getAddress() {
