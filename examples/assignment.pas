@@ -11,7 +11,7 @@ begin
     d := 7 / 3;
     e := true;
 
-    writeln(a, b, c);
+    writeln(a, ' ', b, ' ', c);
     writeln(d);
     writeln(e);
 end.

@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public final class TokenScanner {
-    // TODO Fix lineCol and lineRow, Add, CHARLIT
-
-
+    // TODO Fix lineCol and lineRow
     private static String tokenName = "";
     private static int lineRow = 0;
     private static int lineCol = 0;
@@ -17,6 +15,7 @@ public final class TokenScanner {
     private static boolean sciNotation = false;
     private static boolean readingColon = false;
     private static boolean readingBool = false;
+    private static boolean readingDot = false;
 
     private static ArrayList<Token> tokenArrayList = new ArrayList<>();
 
@@ -168,7 +167,18 @@ public final class TokenScanner {
                 }
                 break;
             case OPERATOR:
-                if (readingString) {
+                if (readingDot && element == '.') {
+                    if (tokenName.equals(".")) {
+                        tokenName = "";
+                        generateToken("TK_RANGE");
+                    } else {
+                        generateToken(tokenName.substring(0, tokenName.length()-2));
+                        generateToken("TK_DOT");
+                        tokenName = "";
+                    }
+                    readingDot = false;
+
+                } else if(readingString) {
                     // Append to a string
                     tokenName += element;
                 } else if (readingNumber) {
@@ -226,10 +236,19 @@ public final class TokenScanner {
                         tokenName = endOfWord();
                         readingColon = true;
                         tokenName += element;
-                    } else if (element == '<' || element == '>'){
+                    } else if (element == '<' || element == '>') {
                         tokenName = endOfWord();
                         readingBool = true;
                         tokenName += element;
+                    } else if (element == '.') {
+                        tokenName += element;
+
+                        if (tokenName.equals("end.")){
+                            generateToken("TK_END");
+                            generateToken("TK_DOT");
+                        } else {
+                            readingDot = true;
+                        }
                     } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
                         tokenName = endOfWord();
 //                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));

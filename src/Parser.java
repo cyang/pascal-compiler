@@ -283,6 +283,7 @@ public final class Parser {
             throw new Error(String.format("Array index LHS type (%s) is not equal to RHS type: (%s)", indexType1, indexType2));
         } else {
 
+            assert indexType1 != null;
             switch (indexType1) {
                 case I:
                     int i1 = Integer.valueOf(v1);
@@ -696,15 +697,10 @@ public final class Parser {
         match("TK_OPEN_PARENTHESIS");
 
         while (true) {
-            // TODO works only for variables and arrays
-
             Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
             TYPE t;
 
             if (symbol != null) {
-                int address = symbol.getAddress();
-
-
                 if (symbol.getDataType() == TYPE.A) {
                     // array
                     currentToken.setTokenType("TK_AN_ARRAY");
@@ -977,7 +973,6 @@ public final class Parser {
                         match("TK_A_VAR");
                         return symbol.getDataType();
                     } else if (symbol.getTokenType().equals("TK_AN_ARRAY")) {
-                        // TODO array
                         currentToken.setTokenType("TK_AN_ARRAY");
 
                         handleArrayAccess(symbol);
