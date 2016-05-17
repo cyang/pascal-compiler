@@ -227,12 +227,17 @@ public class Simulator {
     }
 
     private static void printReal() {
-        int val = (int)stack.pop();
-        byte[] valArray = new byte[4];
 
-        valArray = ByteBuffer.allocate(4).putInt((int) val).array();
+        Object val = stack.pop();
 
-        System.out.print(ByteBuffer.wrap(valArray).getFloat());
+        if (val instanceof Integer) {
+            byte[] valArray = ByteBuffer.allocate(4).putInt((int) val).array();
+
+            System.out.print(ByteBuffer.wrap(valArray).getFloat());
+        } else {
+            System.out.print(val);
+        }
+
     }
 
     private static void printBool() {

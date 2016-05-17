@@ -699,9 +699,11 @@ public final class Parser {
             // TODO works only for variables and arrays
 
             Symbol symbol =  SymbolTable.lookup(currentToken.getTokenValue());
+            TYPE t;
+
             if (symbol != null) {
                 int address = symbol.getAddress();
-                TYPE t;
+
 
                 if (symbol.getDataType() == TYPE.A) {
                     // array
@@ -721,39 +723,67 @@ public final class Parser {
                     genAddress(symbol.getAddress());
                     match("TK_A_VAR");
                 }
-
+            } else {
+                // literal
+                t = getLitType(currentToken.getTokenType());
+                assert t != null;
                 switch (t) {
-                    case I:
-                        genOpCode(OP_CODE.PRINT_INT);
-//                        genAddress(address);
-                        break;
-                    case C:
-                        genOpCode(OP_CODE.PRINT_CHAR);
-//                        genAddress(address);
-                        break;
                     case R:
-                        genOpCode(OP_CODE.PRINT_REAL);
-//                        genAddress(address);
+                        genOpCode(OP_CODE.PUSHF);
+                        genAddress(Float.valueOf(currentToken.getTokenValue()));
+                        break;
+                    case I:
+                        genOpCode(OP_CODE.PUSHI);
+                        genAddress(Integer.valueOf(currentToken.getTokenValue()));
                         break;
                     case B:
-                        genOpCode(OP_CODE.PRINT_BOOL);
-//                        genAddress(address);
+                        genOpCode(OP_CODE.PUSHI);
+                        if (currentToken.getTokenValue().equals("true")) {
+                            genAddress(1);
+                        } else {
+                            genAddress(0);
+                        }
                         break;
-
+                    case C:
+                        genOpCode(OP_CODE.PUSHI);
+                        genAddress((int)(currentToken.getTokenValue().charAt(0)));
+                        break;
                 }
 
-                switch (currentToken.getTokenType()) {
-                    case "TK_COMMA":
-                        match("TK_COMMA");
-                        break;
-                    case "TK_CLOSE_PARENTHESIS":
-                        match("TK_CLOSE_PARENTHESIS");
-                        genOpCode(OP_CODE.PRINT_NEWLINE);
-                        return;
-                    default:
-                        throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
-                }
+                match(currentToken.getTokenType());
             }
+
+            assert t != null;
+            switch (t) {
+                case I:
+                    genOpCode(OP_CODE.PRINT_INT);
+                    break;
+                case C:
+                    genOpCode(OP_CODE.PRINT_CHAR);
+                    break;
+                case R:
+                    genOpCode(OP_CODE.PRINT_REAL);
+                    break;
+                case B:
+                    genOpCode(OP_CODE.PRINT_BOOL);
+                    break;
+                default:
+                    throw new Error("Cannot write unknown type");
+
+            }
+
+            switch (currentToken.getTokenType()) {
+                case "TK_COMMA":
+                    match("TK_COMMA");
+                    break;
+                case "TK_CLOSE_PARENTHESIS":
+                    match("TK_CLOSE_PARENTHESIS");
+                    genOpCode(OP_CODE.PRINT_NEWLINE);
+                    return;
+                default:
+                    throw new Error(String.format("Current token type (%s) is neither TK_COMMA nor TK_CLOSE_PARENTHESIS", currentToken.getTokenType()));
+            }
+
         }
     }
 
@@ -1063,6 +1093,7 @@ public final class Parser {
                     genOpCode(OP_CODE.CVR);
                     genOpCode(OP_CODE.XCHG);
                     genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.XCHG);
                     genOpCode(OP_CODE.FDIV);
                     return TYPE.R;
                 } else if (t1 == TYPE.I && t2 == TYPE.R) {
@@ -1160,7 +1191,7 @@ public final class Parser {
         switch (tokenType) {
             case "TK_INTLIT":
                 return TYPE.I;
-            case "TK_REALLIT":
+            case "TK_FLOATLIT":
                 return TYPE.R;
             case "TK_CHARLIT":
                 return TYPE.C;
