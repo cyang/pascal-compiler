@@ -140,13 +140,13 @@ public final class TokenScanner {
                     // Append to a string
                     tokenName += element;
                 } else if (readingColon) {
-                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+//                    System.out.println(OPERATORS_TOKEN.get(tokenName));
                     generateToken(OPERATORS_TOKEN.get(tokenName));
 
                     readingColon = false;
 
                 } else if (readingBool) {
-                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+//                    System.out.println(OPERATORS_TOKEN.get(tokenName));
                     generateToken(OPERATORS_TOKEN.get(tokenName));
 
                     readingBool = false;
@@ -177,7 +177,7 @@ public final class TokenScanner {
                         tokenName = tokenName.substring(0,tokenName.length()-1);
                         handleNumber();
 
-                        System.out.println("TK_RANGE");
+//                        System.out.println("TK_RANGE");
                         generateToken("TK_RANGE");
                         tokenName = "";
 
@@ -190,14 +190,14 @@ public final class TokenScanner {
                     } else {
                         handleNumber();
 
-                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
+//                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
                         generateToken(OPERATORS_TOKEN.get(String.valueOf(element)));
                     }
                 } else if (readingColon && element == '=') {
 
                     // Handle assignment
                     tokenName += element;
-                    System.out.println(OPERATORS_TOKEN.get(tokenName));
+//                    System.out.println(OPERATORS_TOKEN.get(tokenName));
                     generateToken(OPERATORS_TOKEN.get(tokenName));
 
 
@@ -205,11 +205,11 @@ public final class TokenScanner {
                 } else if (readingBool) {
                     if (tokenName.equals("<") && ((element == '=') || (element == '>'))) {
                         tokenName += element;
-                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+//                        System.out.println(OPERATORS_TOKEN.get(tokenName));
                         generateToken(OPERATORS_TOKEN.get(tokenName));
                     } else if (tokenName.equals(">") && (element == '=')) {
                         tokenName += element;
-                        System.out.println(OPERATORS_TOKEN.get(tokenName));
+//                        System.out.println(OPERATORS_TOKEN.get(tokenName));
                         generateToken(OPERATORS_TOKEN.get(tokenName));
                     }
 
@@ -221,7 +221,7 @@ public final class TokenScanner {
 
                         tokenName = ";";
                         generateToken(OPERATORS_TOKEN.get(String.valueOf(element)));
-                        System.out.println("TK_SEMI_COLON");
+//                        System.out.println("TK_SEMI_COLON");
                     } else if (element == ':') {
                         tokenName = endOfWord();
                         readingColon = true;
@@ -232,7 +232,7 @@ public final class TokenScanner {
                         tokenName += element;
                     } else if (OPERATORS_TOKEN.containsKey(String.valueOf(element))) {
                         tokenName = endOfWord();
-                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
+//                        System.out.println(OPERATORS_TOKEN.get(String.valueOf(element)));
 
                         tokenName = String.valueOf(element);
                         generateToken(OPERATORS_TOKEN.get(tokenName));
@@ -251,10 +251,10 @@ public final class TokenScanner {
 
                     // Found end quote
                     if (tokenName.length() == 1) {
-                        System.out.println("TK_CHARLIT: " + tokenName);
+//                        System.out.println("TK_CHARLIT: " + tokenName);
                         generateToken("TK_CHARLIT");
                     } else if (tokenName.length() > 1) {
-                        System.out.println("TK_STRLIT: " + tokenName);
+//                        System.out.println("TK_STRLIT: " + tokenName);
                         generateToken("TK_STRLIT");
                     }
                 }
@@ -267,16 +267,16 @@ public final class TokenScanner {
 
     public static String endOfWord(){
         if(KEYWORDS_TOKEN.containsKey(tokenName)){
-            System.out.println(KEYWORDS_TOKEN.get(tokenName));
+//            System.out.println(KEYWORDS_TOKEN.get(tokenName));
             generateToken(KEYWORDS_TOKEN.get(tokenName));
         } else {
             if (tokenName.length() > 0) {
 
                 if(tokenName.equals("true") || tokenName.equals("false")) {
-                    System.out.println("TK_BOOLLIT: " + tokenName);
+//                    System.out.println("TK_BOOLLIT: " + tokenName);
                     generateToken("TK_BOOLLIT");
                 } else {
-                    System.out.println("TK_IDENTIFIER: " + tokenName);
+//                    System.out.println("TK_IDENTIFIER: " + tokenName);
                     generateToken("TK_IDENTIFIER");
                 }
             }
@@ -305,11 +305,11 @@ public final class TokenScanner {
     public static void handleNumber() {
         readingNumber = false;
         if (isFloat) {
-            System.out.println("TK_FLOATLIT: " + tokenName);
+//            System.out.println("TK_FLOATLIT: " + tokenName);
             generateToken("TK_FLOATLIT");
             isFloat = false;
         } else {
-            System.out.println("TK_INTLIT: " + tokenName);
+//            System.out.println("TK_INTLIT: " + tokenName);
             generateToken("TK_INTLIT");
         }
     }
