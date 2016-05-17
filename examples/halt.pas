@@ -1,4 +1,0 @@
-program halt;
-
-begin
-end.

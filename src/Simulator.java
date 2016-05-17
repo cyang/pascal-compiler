@@ -25,6 +25,9 @@ public class Simulator {
                 case PUSHI:
                     pushi();
                     break;
+                case PUSHF:
+                    pushf();
+                    break;
                 case POP:
                     pop();
                     break;
@@ -115,6 +118,11 @@ public class Simulator {
 
         }
         while (opCode != Parser.OP_CODE.HALT);
+    }
+
+    private static void pushf() {
+        float val = getFloatValue();
+        stack.push(val);
     }
 
     private static void get() {
@@ -283,11 +291,8 @@ public class Simulator {
     }
 
     public static void fdiv(){
-        Integer intVal2 = (Integer) stack.pop();
-        Float val2 = (float) intVal2;
-
-        Integer intVal1 = (Integer) stack.pop();
-        Float val1 = (float) intVal1;
+        float val2 = (float) stack.pop();
+        float val1 = (float) stack.pop();
 
         stack.push(val1 / val2);
     }
@@ -299,13 +304,13 @@ public class Simulator {
     }
 
     public static void cvr(){
-        float val = (float) stack.pop();
+        float val = Float.valueOf(String.valueOf(stack.pop()));
         stack.push(val);
     }
 
     public static void xchg(){
-        Integer val1 = (int) stack.pop();
-        Integer val2 = (int) stack.pop();
+        Object val1 = stack.pop();
+        Object val2 = stack.pop();
         stack.push(val1);
         stack.push(val2);
     }
@@ -360,9 +365,16 @@ public class Simulator {
         return ByteBuffer.wrap(valArray).getInt();
     }
 
-    public static int getData(int dp) {
-        //dp = getAddressValue();
+    public static float getFloatValue() {
+        byte[] valArray = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            valArray[i] = instructions[ip++];
+        }
 
+        return ByteBuffer.wrap(valArray).getFloat();
+    }
+
+    public static int getData(int dp) {
         byte[] valArray = new byte[4];
         for (int i = 0; i < 4; i++) {
             valArray[i] = dataArray[dp++];

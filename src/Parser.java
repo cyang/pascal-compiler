@@ -24,7 +24,7 @@ public final class Parser {
     }
 
     enum OP_CODE {
-        PUSHI, PUSH, POP,
+        PUSHI, PUSH, POP,PUSHF,
         JMP, JFALSE, JTRUE,
         CVR, CVI,
         DUP, XCHG, REMOVE,
@@ -492,6 +492,7 @@ public final class Parser {
         match("TK_FOR");
 
         String varName = currentToken.getTokenValue();
+        currentToken.setTokenType("TK_A_VAR");
         assignmentStat();
 
         int target = ip;
@@ -964,7 +965,7 @@ public final class Parser {
                 match("TK_INTLIT");
                 return TYPE.I;
             case "TK_FLOATLIT":
-                genOpCode(OP_CODE.PUSHI);
+                genOpCode(OP_CODE.PUSHF);
                 genAddress(Float.valueOf(currentToken.getTokenValue()));
 
                 match("TK_FLOATLIT");
@@ -1058,7 +1059,22 @@ public final class Parser {
                     return TYPE.R;
                 }
             case "TK_DIVIDE":
-                if ((t1 == TYPE.R || t1 == TYPE.I) && (t2 == TYPE.R || t2 == TYPE.I)) {
+                if (t1 == TYPE.I && t2 == TYPE.I) {
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FDIV);
+                    return TYPE.R;
+                } else if (t1 == TYPE.I && t2 == TYPE.R) {
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FDIV);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.I) {
+                    genOpCode(OP_CODE.CVR);
+                    genOpCode(OP_CODE.FDIV);
+                    return TYPE.R;
+                } else if (t1 == TYPE.R && t2 == TYPE.R) {
                     genOpCode(OP_CODE.FDIV);
                     return TYPE.R;
                 }
