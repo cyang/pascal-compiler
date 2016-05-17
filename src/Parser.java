@@ -703,14 +703,22 @@ public final class Parser {
                 TYPE t;
 
                 if (symbol.getDataType() == TYPE.A) {
+                    // array
                     currentToken.setTokenType("TK_AN_ARRAY");
                     handleArrayAccess(symbol);
+
+                    genOpCode(OP_CODE.GET);
 
                     t = symbol.getValueType();
 
                 } else {
+                    // variable
+                    currentToken.setTokenType("TK_A_VAR");
 
-                    t = E();
+                    t = symbol.getDataType();
+                    genOpCode(OP_CODE.PUSH);
+                    genAddress(symbol.getAddress());
+                    match("TK_A_VAR");
                 }
 
                 switch (t) {

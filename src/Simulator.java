@@ -118,7 +118,8 @@ public class Simulator {
     }
 
     private static void get() {
-        stack.push(getData());
+        dp = (int)stack.pop();
+        stack.push(getData(dp));
     }
 
     private static Object put() {
@@ -138,9 +139,7 @@ public class Simulator {
             dataArray[dp++] = b;
         }
 
-
         return val;
-
     }
 
     private static void jtrue() {
@@ -220,18 +219,16 @@ public class Simulator {
     }
 
     private static void printReal() {
-        dp = getData();
-
+        int val = (int)stack.pop();
         byte[] valArray = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            valArray[i] = dataArray[dp++];
-        }
+
+        valArray = ByteBuffer.allocate(4).putInt((int) val).array();
 
         System.out.print(ByteBuffer.wrap(valArray).getFloat());
     }
 
     private static void printBool() {
-        int val = getData();
+        int val = (int) stack.pop();
         if (val == 1) {
             System.out.print("True");
         } else {
@@ -240,12 +237,12 @@ public class Simulator {
     }
 
     public static void printInt(){
-        System.out.print(getData());
+        System.out.print(stack.pop());
 
     }
 
     public static void printChar(){
-        System.out.print(Character.toChars(getData())[0]);
+        System.out.print(Character.toChars((Integer) stack.pop())[0]);
     }
 
     public static void add(){
@@ -319,7 +316,8 @@ public class Simulator {
     }
 
     public static void push(){
-        stack.push(getData());
+        dp = getAddressValue();
+        stack.push(getData(dp));
     }
 
     public static Object pop(){
@@ -362,8 +360,7 @@ public class Simulator {
         return ByteBuffer.wrap(valArray).getInt();
     }
 
-    public static int getData() {
-        dp = (int)stack.pop();
+    public static int getData(int dp) {
         //dp = getAddressValue();
 
         byte[] valArray = new byte[4];
