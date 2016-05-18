@@ -25,5 +25,7 @@ This is a **Pascal** compiler written in Java.
 
 ## For example: 
 `cd src/`
+
 `javac Emulator.java`
+
 `java Emulator ../examples/array.pas`
