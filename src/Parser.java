@@ -809,6 +809,7 @@ public final class Parser {
     private static void arrayAssignmentStat() {
         Symbol symbol = SymbolTable.lookup(currentToken.getTokenValue());
         if (symbol != null) {
+
             handleArrayAccess(symbol);
 
             match("TK_ASSIGNMENT");
@@ -827,68 +828,129 @@ public final class Parser {
     private static void handleArrayAccess(Symbol symbol) {
         match("TK_AN_ARRAY");
         match("TK_OPEN_SQUARE_BRACKET");
+        TYPE t;
 
-        String index = currentToken.getTokenValue();
-        TYPE t = E();
 
-        if (t != symbol.getIndexType()) {
-            throw new Error(String.format("Incompatible index type: (%s, %s)", t, symbol.getIndexType()));
+        Symbol varSymbol = SymbolTable.lookup(currentToken.getTokenValue());
+        if (varSymbol != null) {
+            t = varSymbol.getDataType();
+
+
+            if (t != symbol.getIndexType()) {
+                throw new Error(String.format("Incompatible index type: (%s, %s)", t, symbol.getIndexType()));
+            }
+
+            currentToken.setTokenType("TK_A_VAR");
+            genOpCode(OP_CODE.PUSH);
+            genAddress(varSymbol.getAddress());
+            match("TK_A_VAR");
+
+            match("TK_CLOSE_SQUARE_BRACKET");
+
+            genOpCode(OP_CODE.PUSHI);
+
+            switch (t) {
+                case I:
+
+                    int i1 = (int) symbol.getLow();
+                    int i2 = (int) symbol.getHigh();
+
+                    genAddress(i1);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.SUB);
+
+                    // push element size
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(4);
+
+                    genOpCode(OP_CODE.MULT);
+
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(symbol.getAddress());
+
+                    genOpCode(OP_CODE.ADD);
+
+                    break;
+                case C:
+                    char c1 = (char) symbol.getLow();
+                    char c2 = (char) symbol.getHigh();
+
+                    genAddress(c1);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.SUB);
+
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(symbol.getAddress());
+
+                    genOpCode(OP_CODE.ADD);
+
+                    break;
+            }
+        } else {
+
+
+            String index = currentToken.getTokenValue();
+            t = E();
+
+            if (t != symbol.getIndexType()) {
+                throw new Error(String.format("Incompatible index type: (%s, %s)", t, symbol.getIndexType()));
+            }
+
+            match("TK_CLOSE_SQUARE_BRACKET");
+
+            genOpCode(OP_CODE.PUSHI);
+
+            switch (t) {
+                case I:
+
+                    int i1 = (int) symbol.getLow();
+                    int i2 = (int) symbol.getHigh();
+
+                    // range check:
+                    if (Integer.valueOf(index) < i1 || Integer.valueOf(index) > i2) {
+                        throw new Error(String.format("Index %d is not within range %d to %d",
+                                Integer.valueOf(index), i1, i2));
+                    }
+
+                    genAddress(i1);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.SUB);
+
+                    // push element size
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(4);
+
+                    genOpCode(OP_CODE.MULT);
+
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(symbol.getAddress());
+
+                    genOpCode(OP_CODE.ADD);
+
+                    break;
+                case C:
+                    char c1 = (char) symbol.getLow();
+                    char c2 = (char) symbol.getHigh();
+
+                    // range check
+                    if (index.toCharArray()[0] < c1 || index.toCharArray()[0] > c2) {
+                        throw new Error(String.format("Index %c is not within range %c to %c",
+                                index.toCharArray()[0], c1, c2));
+                    }
+
+                    genAddress(c1);
+                    genOpCode(OP_CODE.XCHG);
+                    genOpCode(OP_CODE.SUB);
+
+                    genOpCode(OP_CODE.PUSHI);
+                    genAddress(symbol.getAddress());
+
+                    genOpCode(OP_CODE.ADD);
+
+                    break;
+            }
+
         }
-
-        match("TK_CLOSE_SQUARE_BRACKET");
-
-        genOpCode(OP_CODE.PUSHI);
-
-        switch (t){
-            case I:
-
-                int i1 = (int)symbol.getLow();
-                int i2 = (int)symbol.getHigh();
-
-                // range check:
-                if (Integer.valueOf(index) < i1 || Integer.valueOf(index) > i2) {
-                    throw new Error(String.format("Index %d is not within range %d to %d",
-                            Integer.valueOf(index), i1, i2));
-                }
-
-                genAddress(i1);
-                genOpCode(OP_CODE.XCHG);
-                genOpCode(OP_CODE.SUB);
-
-                // push element size
-                genOpCode(OP_CODE.PUSHI);
-                genAddress(4);
-
-                genOpCode(OP_CODE.MULT);
-
-                genOpCode(OP_CODE.PUSHI);
-                genAddress(symbol.getAddress());
-
-                genOpCode(OP_CODE.ADD);
-
-                break;
-            case C:
-                char c1 = (char)symbol.getLow();
-                char c2 = (char)symbol.getHigh();
-
-                // range check
-                if (index.toCharArray()[0] < c1 || index.toCharArray()[0] > c2) {
-                    throw new Error(String.format("Index %c is not within range %c to %c",
-                            index.toCharArray()[0], c1, c2));
-                }
-
-                genAddress(c1);
-                genOpCode(OP_CODE.XCHG);
-                genOpCode(OP_CODE.SUB);
-
-                genOpCode(OP_CODE.PUSHI);
-                genAddress(symbol.getAddress());
-
-                genOpCode(OP_CODE.ADD);
-
-                break;
-        }
-
     }
 
     /*
