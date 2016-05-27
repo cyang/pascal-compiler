@@ -1,6 +1,6 @@
 # pascal-compiler
 
-This is a **Pascal** compiler written in Java.
+This is a one-pass **Pascal** compiler using a stack-based representation of intermediate code written in Java.
 
 _**TokenScanner.java**_ - reads each character and creates a list of tokens
 
