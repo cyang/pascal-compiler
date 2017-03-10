@@ -21,7 +21,7 @@ _**keywords.txt**_ - list of Pascal keywords
 ## How to run:
 1. Change directory to src/
 2. Compile Emulator.java
-3. Provide an Pascal file as input to the Emulator program`
+3. Provide a Pascal file as input to the Emulator program`
 
 ## For example: 
 1. `cd src/`
